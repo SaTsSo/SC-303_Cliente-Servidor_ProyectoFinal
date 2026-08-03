@@ -1,4 +1,4 @@
-package GUI;
+package quickdelivery.GUI;
 
 import javax.swing.*;
 
