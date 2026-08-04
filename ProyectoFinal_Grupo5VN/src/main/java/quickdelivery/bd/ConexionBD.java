@@ -42,7 +42,7 @@ public class ConexionBD {
 
     public void setConexion() {
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             this.conexion = DriverManager.getConnection(url, username, password);
         } catch (SQLException e) {
             e.printStackTrace();
