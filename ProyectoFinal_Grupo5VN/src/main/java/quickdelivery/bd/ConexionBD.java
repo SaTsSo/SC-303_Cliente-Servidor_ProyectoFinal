@@ -14,15 +14,21 @@ public class ConexionBD {
 
     String url = "jdbc:mysql://localhost:3306/QuickDelivery";
     String username = "root";
-    String password = "password";
+    String password = "1234";
 
 
     //Métodos para la conexión a la BD
     public void setConsulta(String sql) {
         try {
+            if (conexion == null) {
+                throw new SQLException(
+                        "No hay conexión a MySQL. Revise usuario/contraseña y que exista la BD QuickDelivery."
+                );
+            }
             this.consulta = conexion.prepareStatement(sql);
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
@@ -45,6 +51,10 @@ public class ConexionBD {
             this.conexion = DriverManager.getConnection(url, username, password);
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new RuntimeException(
+                    "No se pudo conectar a MySQL (" + e.getMessage() + ")",
+                    e
+            );
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }

@@ -37,44 +37,58 @@ public class ProcesadorCliente implements Runnable {
 
                 System.out.println("Solicitud recibida: " + solicitud);
 
-                switch (solicitud) {
+                try {
+                    switch (solicitud) {
 
-                    case Protocolo.LISTAR_PAQUETES:
-                        listarPaquetes();
-                        break;
+                        case Protocolo.LISTAR_PAQUETES:
+                            listarPaquetes();
+                            break;
 
-                    case Protocolo.CONSULTAR_PAQUETE:
-                        consultarPaquete();
-                        break;
+                        case Protocolo.CONSULTAR_PAQUETE:
+                            consultarPaquete();
+                            break;
 
-                    case Protocolo.INSERTAR_PAQUETE:
-                        insertarPaquete();
-                        break;
+                        case Protocolo.INSERTAR_PAQUETE:
+                            insertarPaquete();
+                            break;
 
-                    case Protocolo.MODIFICAR_PAQUETE:
-                        modificarPaquete();
-                        break;
+                        case Protocolo.MODIFICAR_PAQUETE:
+                            modificarPaquete();
+                            break;
 
-                    case Protocolo.ACTUALIZAR_ESTADO:
-                        actualizarEstado();
-                        break;
+                        case Protocolo.ACTUALIZAR_ESTADO:
+                            actualizarEstado();
+                            break;
 
-                    case Protocolo.ELIMINAR_PAQUETE:
-                        eliminarPaquete();
-                        break;
+                        case Protocolo.ELIMINAR_PAQUETE:
+                            eliminarPaquete();
+                            break;
 
-                    case Protocolo.DESCONECTAR:
-                        salida.writeUTF(Protocolo.OK);
-                        salida.writeUTF("Cliente desconectado correctamente.");
-                        salida.flush();
-                        conectado = false;
-                        break;
+                        case Protocolo.DESCONECTAR:
+                            salida.writeUTF(Protocolo.OK);
+                            salida.writeUTF("Cliente desconectado correctamente.");
+                            salida.flush();
+                            conectado = false;
+                            break;
 
-                    default:
+                        default:
+                            salida.writeUTF(Protocolo.ERROR);
+                            salida.writeUTF("Solicitud no reconocida.");
+                            salida.flush();
+                            break;
+                    }
+                } catch (Exception ex) {
+                    System.out.println("Error en solicitud: " + ex.toString());
+                    ex.printStackTrace();
+                    try {
                         salida.writeUTF(Protocolo.ERROR);
-                        salida.writeUTF("Solicitud no reconocida.");
+                        salida.writeUTF(
+                                "Error en el servidor: " + ex.getMessage()
+                        );
                         salida.flush();
-                        break;
+                    } catch (IOException ignored) {
+                        conectado = false;
+                    }
                 }
             }
 
