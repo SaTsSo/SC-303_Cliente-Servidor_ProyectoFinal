@@ -31,6 +31,24 @@ public class ControladorPaquetes {
         vista.getBtnLimpiar().addActionListener(e -> vista.limpiarCampos());
 
         vista.mostrarMensaje(VistaPaquetes.AYUDA);
+        vista.actualizarBotonRegistrar();
+
+        vista.getTxtId().getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                vista.actualizarBotonRegistrar();
+            }
+
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                vista.actualizarBotonRegistrar();
+            }
+
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                vista.actualizarBotonRegistrar();
+            }
+        });
 
         vista.getTablaPaquetes().getSelectionModel().addListSelectionListener(
                 (ListSelectionEvent e) -> {
@@ -43,8 +61,13 @@ public class ControladorPaquetes {
 
     private void registrar() {
         try {
-            String idEscrito = vista.getTxtId().getText().trim();
-            boolean teniaId = !idEscrito.isEmpty();
+            if (!vista.getTxtId().getText().trim().isEmpty()) {
+                mostrarError(
+                        "Hay un paquete cargado. Pulse Limpiar para registrar uno nuevo, "
+                                + "o use Actualizar si desea modificar el actual."
+                );
+                return;
+            }
 
             Paquete paquete = leerPaqueteDelFormulario(false);
 
@@ -55,24 +78,9 @@ public class ControladorPaquetes {
             cliente.insertarPaquete(paquete);
             listar();
             vista.limpiarCampos();
-
-            if (teniaId) {
-                String mensaje =
-                        "Paquete registrado correctamente.\n"
-                                + "El ID \"" + idEscrito + "\" no se usó: "
-                                + "al registrar la base de datos crea el ID automáticamente.";
-                vista.mostrarMensaje(mensaje.replace('\n', ' '));
-                JOptionPane.showMessageDialog(
-                        vista,
-                        mensaje,
-                        "Registro",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-            } else {
-                vista.mostrarMensaje(
-                        "Paquete registrado correctamente. El ID lo asignó la base de datos."
-                );
-            }
+            vista.mostrarMensaje(
+                    "Paquete registrado correctamente. El ID lo asignó la base de datos."
+            );
         } catch (Exception ex) {
             mostrarError("Error al registrar: " + ex.getMessage());
         }
