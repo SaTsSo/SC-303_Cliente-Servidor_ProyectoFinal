@@ -3,7 +3,9 @@ package quickdelivery.vista;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -17,12 +19,24 @@ import javax.swing.table.DefaultTableModel;
  */
 public class VistaPaquetes extends JFrame {
 
+    public static final String[] ESTADOS = {
+        "1 - Pendiente",
+        "2 - En transito",
+        "3 - Entregado",
+        "4 - Incidencia"
+    };
+
+    public static final String AYUDA =
+            "Registrar: complete los datos (sin ID). "
+                    + "Consultar/Actualizar/Eliminar: escriba el ID o seleccione una fila. "
+                    + "Listar: muestra todos los paquetes.";
+
     private JTextField txtId;
     private JTextField txtDescripcion;
     private JTextField txtOrigen;
     private JTextField txtDestino;
     private JTextField txtPeso;
-    private JTextField txtEstado;
+    private JComboBox<String> cmbEstado;
     private JTextField txtFecha;
 
     private JButton btnRegistrar;
@@ -35,6 +49,7 @@ public class VistaPaquetes extends JFrame {
     private JTable tablaPaquetes;
     private DefaultTableModel modeloTabla;
     private JLabel lblMensaje;
+    private JLabel lblAyuda;
 
     public VistaPaquetes() {
         setTitle("QuickDelivery - CRUD Paquetes");
@@ -45,7 +60,7 @@ public class VistaPaquetes extends JFrame {
 
         add(crearPanelFormulario(), BorderLayout.NORTH);
         add(crearPanelTabla(), BorderLayout.CENTER);
-        add(crearPanelMensaje(), BorderLayout.SOUTH);
+        add(crearPanelInferior(), BorderLayout.SOUTH);
     }
 
     private JPanel crearPanelFormulario() {
@@ -58,10 +73,10 @@ public class VistaPaquetes extends JFrame {
         txtOrigen = new JTextField();
         txtDestino = new JTextField();
         txtPeso = new JTextField();
-        txtEstado = new JTextField("1");
+        cmbEstado = new JComboBox<>(new DefaultComboBoxModel<>(ESTADOS));
         txtFecha = new JTextField();
 
-        campos.add(new JLabel("ID:"));
+        campos.add(new JLabel("ID (solo consultar / actualizar / eliminar):"));
         campos.add(txtId);
         campos.add(new JLabel("Descripción:"));
         campos.add(txtDescripcion);
@@ -69,10 +84,10 @@ public class VistaPaquetes extends JFrame {
         campos.add(txtOrigen);
         campos.add(new JLabel("Dirección destino:"));
         campos.add(txtDestino);
-        campos.add(new JLabel("Peso:"));
+        campos.add(new JLabel("Peso (kg):"));
         campos.add(txtPeso);
-        campos.add(new JLabel("ID Estado:"));
-        campos.add(txtEstado);
+        campos.add(new JLabel("Estado:"));
+        campos.add(cmbEstado);
         campos.add(new JLabel("Fecha registro:"));
         campos.add(txtFecha);
 
@@ -98,7 +113,7 @@ public class VistaPaquetes extends JFrame {
 
     private JScrollPane crearPanelTabla() {
         String[] columnas = {
-            "ID", "Descripción", "Origen", "Destino", "Peso", "Estado", "Fecha"
+            "ID", "Descripción", "Origen", "Destino", "Peso (kg)", "Estado", "Fecha"
         };
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
@@ -110,10 +125,14 @@ public class VistaPaquetes extends JFrame {
         return new JScrollPane(tablaPaquetes);
     }
 
-    private JPanel crearPanelMensaje() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        lblMensaje = new JLabel(" ");
-        panel.add(lblMensaje);
+    private JPanel crearPanelInferior() {
+        JPanel panel = new JPanel(new BorderLayout(5, 5));
+
+        lblAyuda = new JLabel(AYUDA);
+        lblMensaje = new JLabel("Listo.");
+
+        panel.add(lblAyuda, BorderLayout.NORTH);
+        panel.add(lblMensaje, BorderLayout.SOUTH);
         return panel;
     }
 
@@ -127,8 +146,9 @@ public class VistaPaquetes extends JFrame {
         txtOrigen.setText("");
         txtDestino.setText("");
         txtPeso.setText("");
-        txtEstado.setText("1");
+        cmbEstado.setSelectedIndex(0);
         txtFecha.setText("");
+        mostrarMensaje("Formulario limpio.");
     }
 
     public void cargarPaqueteEnFormulario(
@@ -145,8 +165,22 @@ public class VistaPaquetes extends JFrame {
         txtOrigen.setText(origen);
         txtDestino.setText(destino);
         txtPeso.setText(peso);
-        txtEstado.setText(String.valueOf(estado));
+        seleccionarEstado(estado);
         txtFecha.setText(fecha);
+        mostrarMensaje("Paquete cargado. Puede Actualizar o Eliminar.");
+    }
+
+    public void seleccionarEstado(int idEstado) {
+        int indice = idEstado - 1;
+        if (indice >= 0 && indice < ESTADOS.length) {
+            cmbEstado.setSelectedIndex(indice);
+        } else {
+            cmbEstado.setSelectedIndex(0);
+        }
+    }
+
+    public int getIdEstadoSeleccionado() {
+        return cmbEstado.getSelectedIndex() + 1;
     }
 
     public void limpiarTabla() {
@@ -155,6 +189,14 @@ public class VistaPaquetes extends JFrame {
 
     public void agregarFilaTabla(Object[] fila) {
         modeloTabla.addRow(fila);
+    }
+
+    public static String nombreEstado(int idEstado) {
+        int indice = idEstado - 1;
+        if (indice >= 0 && indice < ESTADOS.length) {
+            return ESTADOS[indice];
+        }
+        return String.valueOf(idEstado);
     }
 
     public JTextField getTxtId() {
@@ -177,8 +219,8 @@ public class VistaPaquetes extends JFrame {
         return txtPeso;
     }
 
-    public JTextField getTxtEstado() {
-        return txtEstado;
+    public JComboBox<String> getCmbEstado() {
+        return cmbEstado;
     }
 
     public JTextField getTxtFecha() {

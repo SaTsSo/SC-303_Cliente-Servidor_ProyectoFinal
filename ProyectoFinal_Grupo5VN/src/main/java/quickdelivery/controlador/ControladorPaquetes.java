@@ -30,6 +30,8 @@ public class ControladorPaquetes {
         vista.getBtnListar().addActionListener(e -> listar());
         vista.getBtnLimpiar().addActionListener(e -> vista.limpiarCampos());
 
+        vista.mostrarMensaje(VistaPaquetes.AYUDA);
+
         vista.getTablaPaquetes().getSelectionModel().addListSelectionListener(
                 (ListSelectionEvent e) -> {
                     if (!e.getValueIsAdjusting()) {
@@ -41,6 +43,9 @@ public class ControladorPaquetes {
 
     private void registrar() {
         try {
+            String idEscrito = vista.getTxtId().getText().trim();
+            boolean teniaId = !idEscrito.isEmpty();
+
             Paquete paquete = leerPaqueteDelFormulario(false);
 
             if (paquete.getFechaRegistro() == null || paquete.getFechaRegistro().isBlank()) {
@@ -48,9 +53,26 @@ public class ControladorPaquetes {
             }
 
             cliente.insertarPaquete(paquete);
-            vista.mostrarMensaje("Paquete registrado correctamente.");
             listar();
             vista.limpiarCampos();
+
+            if (teniaId) {
+                String mensaje =
+                        "Paquete registrado correctamente.\n"
+                                + "El ID \"" + idEscrito + "\" no se usó: "
+                                + "al registrar la base de datos crea el ID automáticamente.";
+                vista.mostrarMensaje(mensaje.replace('\n', ' '));
+                JOptionPane.showMessageDialog(
+                        vista,
+                        mensaje,
+                        "Registro",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+            } else {
+                vista.mostrarMensaje(
+                        "Paquete registrado correctamente. El ID lo asignó la base de datos."
+                );
+            }
         } catch (Exception ex) {
             mostrarError("Error al registrar: " + ex.getMessage());
         }
@@ -129,7 +151,7 @@ public class ControladorPaquetes {
                     paquete.getDireccionOrigen(),
                     paquete.getDireccionDestino(),
                     paquete.getPeso(),
-                    paquete.getIdEstado(),
+                    VistaPaquetes.nombreEstado(paquete.getIdEstado()),
                     paquete.getFechaRegistro()
                 });
             }
@@ -146,13 +168,19 @@ public class ControladorPaquetes {
             return;
         }
 
+        String estadoTexto = vista.getTablaPaquetes().getValueAt(fila, 5).toString();
+        int idEstado = 1;
+        if (estadoTexto.contains(" - ")) {
+            idEstado = Integer.parseInt(estadoTexto.substring(0, estadoTexto.indexOf(' ')));
+        }
+
         vista.cargarPaqueteEnFormulario(
                 Long.parseLong(vista.getTablaPaquetes().getValueAt(fila, 0).toString()),
                 vista.getTablaPaquetes().getValueAt(fila, 1).toString(),
                 vista.getTablaPaquetes().getValueAt(fila, 2).toString(),
                 vista.getTablaPaquetes().getValueAt(fila, 3).toString(),
                 vista.getTablaPaquetes().getValueAt(fila, 4).toString(),
-                Integer.parseInt(vista.getTablaPaquetes().getValueAt(fila, 5).toString()),
+                idEstado,
                 vista.getTablaPaquetes().getValueAt(fila, 6).toString()
         );
     }
@@ -173,20 +201,36 @@ public class ControladorPaquetes {
         String descripcion = vista.getTxtDescripcion().getText().trim();
         String origen = vista.getTxtOrigen().getText().trim();
         String destino = vista.getTxtDestino().getText().trim();
-        String peso = vista.getTxtPeso().getText().trim();
-        String estadoTexto = vista.getTxtEstado().getText().trim();
+        String pesoTexto = vista.getTxtPeso().getText().trim();
 
-        if (descripcion.isEmpty() || origen.isEmpty() || destino.isEmpty() || peso.isEmpty()) {
+        if (descripcion.isEmpty() || origen.isEmpty() || destino.isEmpty() || pesoTexto.isEmpty()) {
             throw new IllegalArgumentException(
                     "Complete descripción, origen, destino y peso."
+            );
+        }
+
+        String pesoNormalizado = pesoTexto.toLowerCase().replace("kg", "").trim().replace(',', '.');
+        try {
+            double pesoNumero = Double.parseDouble(pesoNormalizado);
+            if (pesoNumero <= 0) {
+                throw new IllegalArgumentException("El peso debe ser mayor que 0.");
+            }
+            // Guarda el número limpio (ej. 10.5)
+            if (pesoNumero == Math.rint(pesoNumero)) {
+                paquete.setPeso(String.valueOf((long) pesoNumero));
+            } else {
+                paquete.setPeso(String.valueOf(pesoNumero));
+            }
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException(
+                    "El peso debe ser un número, por ejemplo 10 o 10.5"
             );
         }
 
         paquete.setDescripcion(descripcion);
         paquete.setDireccionOrigen(origen);
         paquete.setDireccionDestino(destino);
-        paquete.setPeso(peso);
-        paquete.setIdEstado(Integer.parseInt(estadoTexto.isEmpty() ? "1" : estadoTexto));
+        paquete.setIdEstado(vista.getIdEstadoSeleccionado());
         paquete.setFechaRegistro(vista.getTxtFecha().getText().trim());
 
         return paquete;
