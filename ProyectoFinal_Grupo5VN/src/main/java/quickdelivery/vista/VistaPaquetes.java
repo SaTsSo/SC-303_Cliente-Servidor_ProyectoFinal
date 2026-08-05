@@ -148,8 +148,7 @@ public class VistaPaquetes extends JFrame {
         txtPeso.setText("");
         cmbEstado.setSelectedIndex(0);
         txtFecha.setText("");
-        actualizarBotonRegistrar();
-        mostrarMensaje("Formulario limpio. Puede registrar un paquete nuevo.");
+        mostrarMensaje("Formulario limpio.");
     }
 
     public void cargarPaqueteEnFormulario(
@@ -168,16 +167,7 @@ public class VistaPaquetes extends JFrame {
         txtPeso.setText(peso);
         seleccionarEstado(estado);
         txtFecha.setText(fecha);
-        actualizarBotonRegistrar();
-        mostrarMensaje("Paquete cargado. Use Actualizar o Eliminar. Para crear uno nuevo, pulse Limpiar.");
-    }
-
-    /**
-     * Registrar solo si no hay ID cargado (paquete nuevo).
-     */
-    public void actualizarBotonRegistrar() {
-        boolean esNuevo = txtId.getText().trim().isEmpty();
-        btnRegistrar.setEnabled(esNuevo);
+        mostrarMensaje("Paquete cargado. Puede Actualizar o Eliminar.");
     }
 
     public void seleccionarEstado(int idEstado) {
