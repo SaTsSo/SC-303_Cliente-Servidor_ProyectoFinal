@@ -23,8 +23,9 @@ import java.net.Socket;
 
                     ProcesadorCliente procesador =
                             new ProcesadorCliente(cliente);
+                    Thread hilo = new Thread(procesador);
 
-                    procesador.procesar();
+                    hilo.start();
                 }
 
             } catch (IOException ex) {

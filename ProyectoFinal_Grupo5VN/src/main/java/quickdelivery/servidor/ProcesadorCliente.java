@@ -8,11 +8,13 @@ import quickdelivery.protocolo.Protocolo;
 import quickdelivery.dao.PaqueteDAO;
 import quickdelivery.modelos.Paquete;
 
-public class ProcesadorCliente {
+public class ProcesadorCliente implements Runnable {
 
     private Socket cliente;
     private DataInputStream entrada;
     private DataOutputStream salida;
+
+
 
     public ProcesadorCliente(Socket cliente) {
         this.cliente = cliente;
@@ -28,6 +30,7 @@ public class ProcesadorCliente {
             salida = new DataOutputStream(cliente.getOutputStream());
 
             while (conectado) {
+                System.out.println("Esperando solicitud...");
 
                 String solicitud = entrada.readUTF();
 
@@ -48,12 +51,16 @@ public class ProcesadorCliente {
 
                     long idPaquete = entrada.readLong();
 
+                    System.out.println("ID recibido: " + idPaquete);
+
                     PaqueteDAO paqueteDAO = new PaqueteDAO();
 
+                    System.out.println("Consultando BD...");
+
                     Paquete paquete =
-                            paqueteDAO.consultarPaquetePorId(
-                                    idPaquete
-                            );
+                            paqueteDAO.consultarPaquetePorId(idPaquete);
+
+                    System.out.println("Consulta terminada");
 
                     if (paquete != null) {
 
@@ -63,28 +70,29 @@ public class ProcesadorCliente {
                                 paquete.getIdPaquete()
                         );
 
+                        // se realiza este cambio por si alguno de estos valores es null, no tire excepcion y cierre el socket
                         salida.writeUTF(
-                                paquete.getDescripcion()
+                                paquete.getDescripcion() == null ? "" : paquete.getDescripcion()
                         );
-
+                        // se realiza este cambio por si alguno de estos valores es null, no tire excepcion y cierre el socket
                         salida.writeUTF(
-                                paquete.getDireccionOrigen()
+                                paquete.getDireccionOrigen() == null ? "" : paquete.getDireccionOrigen()
                         );
-
+                        // se realiza este cambio por si alguno de estos valores es null, no tire excepcion y cierre el socket
                         salida.writeUTF(
-                                paquete.getDireccionDestino()
+                                paquete.getDireccionDestino() == null ? "" : paquete.getDireccionDestino()
                         );
-
+                        // se realiza este cambio por si alguno de estos valores es null, no tire excepcion y cierre el socket
                         salida.writeUTF(
-                                paquete.getPeso()
+                                paquete.getPeso() == null ? "" : paquete.getPeso()
                         );
 
                         salida.writeInt(
                                 paquete.getIdEstado()
                         );
-
+                        // se realiza este cambio por si alguno de estos valores es null, no tire excepcion y cierre el socket
                         salida.writeUTF(
-                                paquete.getFechaRegistro()
+                                paquete.getFechaRegistro() == null ? "" : paquete.getFechaRegistro()
                         );
 
                     } else {
@@ -114,6 +122,8 @@ public class ProcesadorCliente {
                             + ex.toString()
             );
 
+            ex.printStackTrace();
+
         } finally {
 
             try {
@@ -142,6 +152,11 @@ public class ProcesadorCliente {
                 );
             }
         }
+    }
+
+    @Override
+    public void run() {
+        procesar();
     }
 }
 
