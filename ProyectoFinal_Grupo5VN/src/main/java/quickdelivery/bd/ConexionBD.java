@@ -8,13 +8,13 @@ import java.sql.SQLException;
 
 public class ConexionBD {
 
-    Connection conexion = null;
-    PreparedStatement consulta = null;
-    ResultSet resultado = null;
+    private Connection conexion = null;
+    private PreparedStatement consulta = null;
+    private ResultSet resultado = null;
 
-    String url = "jdbc:mysql://localhost:3306/QuickDelivery";
-    String username = "root";
-    String password = "1234";
+    private String url = "jdbc:mysql://localhost:3306/QuickDelivery";
+    private String username = "quickdelivery_user";
+    private String password = "QuickDelivery123";
 
 
     //Métodos para la conexión a la BD
