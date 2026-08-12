@@ -1,6 +1,8 @@
 /*Integrantes:
-Samuel Tsai Solis
-
+Byron Benavides Hidalgo
+Eber Jesus Velasquez Ramirez
+Samuel Tsai Solís
+Yabeth Villafuerte Sotelo
 */
 
 package quickdelivery;
