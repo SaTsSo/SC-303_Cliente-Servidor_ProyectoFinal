@@ -48,6 +48,26 @@ public class ProcesadorCliente implements Runnable {
                             login();
                             break;
 
+                        case Protocolo.LISTAR_USUARIOS:
+                            listarUsuarios();
+                            break;
+
+                        case Protocolo.CONSULTAR_USUARIO:
+                            consultarUsuario();
+                            break;
+
+                        case Protocolo.INSERTAR_USUARIO:
+                            insertarUsuario();
+                            break;
+
+                        case Protocolo.MODIFICAR_USUARIO:
+                            modificarUsuario();
+                            break;
+
+                        case Protocolo.ELIMINAR_USUARIO:
+                            eliminarUsuario();
+                            break;
+
                         case Protocolo.LISTAR_PAQUETES:
                             listarPaquetes();
                             break;
@@ -158,6 +178,151 @@ public class ProcesadorCliente implements Runnable {
         }
 
         salida.flush();
+    }
+
+    private void listarUsuarios() throws IOException {
+        List<Usuario> usuarios = usuarioDAO.listarUsuarios();
+
+        salida.writeUTF(Protocolo.OK);
+        salida.writeInt(usuarios.size());
+
+        for (Usuario usuario : usuarios) {
+            escribirUsuario(usuario);
+        }
+
+        salida.flush();
+    }
+
+    private void consultarUsuario() throws IOException {
+        long idUsuario = entrada.readLong();
+
+        if (idUsuario <= 0) {
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("El ID del usuario no es valido.");
+            salida.flush();
+            return;
+        }
+
+        Usuario usuario = usuarioDAO.consultarUsuarioPorId(idUsuario);
+
+        if (usuario != null) {
+            salida.writeUTF(Protocolo.OK);
+            escribirUsuario(usuario);
+        } else {
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("Usuario no encontrado.");
+        }
+
+        salida.flush();
+    }
+
+    private void insertarUsuario() throws IOException {
+        Usuario usuario = new Usuario();
+        usuario.setNombreUsuario(entrada.readUTF());
+        usuario.setContrasena(entrada.readUTF());
+        usuario.setNombreCompleto(entrada.readUTF());
+        usuario.setEmail(entrada.readUTF());
+        usuario.setIdRol(entrada.readInt());
+
+        if (!validarDatosUsuario(usuario, true)) {
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("Los datos ingresados no son validos.");
+            salida.flush();
+            return;
+        }
+
+        usuarioDAO.insertarUsuario(usuario);
+        salida.writeUTF(Protocolo.OK);
+        salida.writeUTF("Usuario insertado correctamente.");
+        salida.flush();
+    }
+
+    private void modificarUsuario() throws IOException {
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(entrada.readLong());
+        usuario.setNombreUsuario(entrada.readUTF());
+        usuario.setContrasena(entrada.readUTF());
+        usuario.setNombreCompleto(entrada.readUTF());
+        usuario.setEmail(entrada.readUTF());
+        usuario.setIdRol(entrada.readInt());
+
+        if (usuario.getIdUsuario() <= 0 || !validarDatosUsuario(usuario, false)) {
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("Los datos ingresados no son validos.");
+            salida.flush();
+            return;
+        }
+
+        Usuario existente = usuarioDAO.consultarUsuarioPorId(usuario.getIdUsuario());
+
+        if (existente == null) {
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("Usuario no encontrado.");
+        } else {
+            usuarioDAO.modificarUsuario(usuario);
+            salida.writeUTF(Protocolo.OK);
+            salida.writeUTF("Usuario modificado correctamente.");
+        }
+
+        salida.flush();
+    }
+
+    private void eliminarUsuario() throws IOException {
+        long idUsuario = entrada.readLong();
+
+        if (idUsuario <= 0) {
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("El ID del usuario no es valido.");
+            salida.flush();
+            return;
+        }
+
+        Usuario existente = usuarioDAO.consultarUsuarioPorId(idUsuario);
+
+        if (existente == null) {
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("Usuario no encontrado.");
+        } else {
+            usuarioDAO.eliminarUsuario(idUsuario);
+            salida.writeUTF(Protocolo.OK);
+            salida.writeUTF("Usuario eliminado correctamente.");
+        }
+
+        salida.flush();
+    }
+
+    private boolean validarDatosUsuario(Usuario usuario, boolean contrasenaObligatoria) {
+        if (usuario == null) {
+            return false;
+        }
+
+        if (usuario.getNombreUsuario() == null || usuario.getNombreUsuario().trim().isEmpty()) {
+            return false;
+        }
+
+        if (contrasenaObligatoria
+                && (usuario.getContrasena() == null || usuario.getContrasena().trim().isEmpty())) {
+            return false;
+        }
+
+        if (usuario.getNombreCompleto() == null || usuario.getNombreCompleto().trim().isEmpty()) {
+            return false;
+        }
+
+        if (usuario.getEmail() == null || usuario.getEmail().trim().isEmpty()) {
+            return false;
+        }
+
+        int idRol = usuario.getIdRol();
+        return idRol >= 1 && idRol <= 3;
+    }
+
+    private void escribirUsuario(Usuario usuario) throws IOException {
+        salida.writeLong(usuario.getIdUsuario());
+        salida.writeUTF(nuloAVacio(usuario.getNombreUsuario()));
+        salida.writeUTF(nuloAVacio(usuario.getNombreCompleto()));
+        salida.writeUTF(nuloAVacio(usuario.getEmail()));
+        salida.writeInt(usuario.getIdRol());
     }
 
     private void listarPaquetes() throws IOException {

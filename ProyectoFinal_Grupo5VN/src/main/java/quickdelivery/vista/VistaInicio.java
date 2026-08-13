@@ -15,6 +15,7 @@ import javax.swing.SwingConstants;
 import quickdelivery.cliente.ClienteSocket;
 import quickdelivery.controlador.ControladorLogin;
 import quickdelivery.controlador.ControladorPaquetes;
+import quickdelivery.controlador.ControladorUsuarios;
 import quickdelivery.modelos.Sesion;
 import quickdelivery.util.Permisos;
 
@@ -113,6 +114,7 @@ public class VistaInicio extends JFrame {
         btnCerrarSesion.addActionListener(e -> cerrarSesion());
 
         btnPaquetes.addActionListener(e -> abrirPaquetes());
+        btnUsuarios.addActionListener(e -> abrirUsuarios());
 
         btnVehiculos.addActionListener(e ->
                 JOptionPane.showMessageDialog(this, "Módulo de vehículos pendiente.")
@@ -123,9 +125,38 @@ public class VistaInicio extends JFrame {
         btnSeguimiento.addActionListener(e ->
                 JOptionPane.showMessageDialog(this, "Módulo de seguimiento pendiente.")
         );
-        btnUsuarios.addActionListener(e ->
-                JOptionPane.showMessageDialog(this, "Módulo de usuarios pendiente.")
-        );
+    }
+
+    private void abrirUsuarios() {
+        try {
+            ClienteSocket cliente = new ClienteSocket();
+            cliente.conectar();
+
+            VistaUsuarios vistaUsuarios = new VistaUsuarios();
+            new ControladorUsuarios(vistaUsuarios, cliente);
+
+            vistaUsuarios.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosing(java.awt.event.WindowEvent e) {
+                    try {
+                        cliente.desconectar();
+                    } catch (Exception ex) {
+                        System.out.println("Error al desconectar: " + ex.getMessage());
+                    }
+                }
+            });
+
+            vistaUsuarios.setVisible(true);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "No se pudo conectar al servidor.\n"
+                            + "Asegúrese de que el Servidor esté en ejecución (puerto 5200).\n"
+                            + ex.getMessage(),
+                    "Error de conexión",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
     }
 
     private void abrirPaquetes() {

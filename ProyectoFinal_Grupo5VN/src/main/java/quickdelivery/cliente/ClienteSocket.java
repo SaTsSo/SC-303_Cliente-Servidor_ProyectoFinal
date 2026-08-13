@@ -60,6 +60,71 @@ public class ClienteSocket {
         return usuario;
     }
 
+    public List<Usuario> listarUsuarios() throws IOException {
+        salida.writeUTF(Protocolo.LISTAR_USUARIOS);
+        salida.flush();
+
+        String respuesta = entrada.readUTF();
+        if (!respuesta.equals(Protocolo.OK)) {
+            throw new IOException(entrada.readUTF());
+        }
+
+        int cantidad = entrada.readInt();
+        List<Usuario> usuarios = new ArrayList<>();
+
+        for (int i = 0; i < cantidad; i++) {
+            usuarios.add(leerUsuario());
+        }
+
+        return usuarios;
+    }
+
+    public Usuario consultarUsuario(long id) throws IOException {
+        salida.writeUTF(Protocolo.CONSULTAR_USUARIO);
+        salida.writeLong(id);
+        salida.flush();
+
+        String respuesta = entrada.readUTF();
+        if (!respuesta.equals(Protocolo.OK)) {
+            throw new IOException(entrada.readUTF());
+        }
+
+        return leerUsuario();
+    }
+
+    public void insertarUsuario(Usuario usuario) throws IOException {
+        salida.writeUTF(Protocolo.INSERTAR_USUARIO);
+        salida.writeUTF(usuario.getNombreUsuario());
+        salida.writeUTF(usuario.getContrasena());
+        salida.writeUTF(usuario.getNombreCompleto());
+        salida.writeUTF(usuario.getEmail());
+        salida.writeInt(usuario.getIdRol());
+        salida.flush();
+
+        leerRespuestaSimple();
+    }
+
+    public void modificarUsuario(Usuario usuario) throws IOException {
+        salida.writeUTF(Protocolo.MODIFICAR_USUARIO);
+        salida.writeLong(usuario.getIdUsuario());
+        salida.writeUTF(usuario.getNombreUsuario());
+        salida.writeUTF(usuario.getContrasena() == null ? "" : usuario.getContrasena());
+        salida.writeUTF(usuario.getNombreCompleto());
+        salida.writeUTF(usuario.getEmail());
+        salida.writeInt(usuario.getIdRol());
+        salida.flush();
+
+        leerRespuestaSimple();
+    }
+
+    public void eliminarUsuario(long id) throws IOException {
+        salida.writeUTF(Protocolo.ELIMINAR_USUARIO);
+        salida.writeLong(id);
+        salida.flush();
+
+        leerRespuestaSimple();
+    }
+
     public List<Paquete> listarPaquetes() throws IOException {
         salida.writeUTF(Protocolo.LISTAR_PAQUETES);
         salida.flush();
@@ -123,6 +188,16 @@ public class ClienteSocket {
         salida.flush();
 
         leerRespuestaSimple();
+    }
+
+    private Usuario leerUsuario() throws IOException {
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(entrada.readLong());
+        usuario.setNombreUsuario(entrada.readUTF());
+        usuario.setNombreCompleto(entrada.readUTF());
+        usuario.setEmail(entrada.readUTF());
+        usuario.setIdRol(entrada.readInt());
+        return usuario;
     }
 
     private Paquete leerPaquete() throws IOException {
