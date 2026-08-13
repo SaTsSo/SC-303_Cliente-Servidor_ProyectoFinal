@@ -1,6 +1,7 @@
 package quickdelivery.controlador;
 
-import quickdelivery.dao.UsuarioDAO;
+import javax.swing.JOptionPane;
+import quickdelivery.cliente.ClienteSocket;
 import quickdelivery.modelos.Sesion;
 import quickdelivery.modelos.Usuario;
 import quickdelivery.vista.VistaInicio;
@@ -9,11 +10,9 @@ import quickdelivery.vista.VistaLogin;
 public class ControladorLogin {
 
     private final VistaLogin vista;
-    private final UsuarioDAO usuarioDAO;
 
     public ControladorLogin(VistaLogin vista) {
         this.vista = vista;
-        this.usuarioDAO = new UsuarioDAO();
         iniciarEventos();
     }
 
@@ -32,18 +31,39 @@ public class ControladorLogin {
             return;
         }
 
-        Usuario usuario = usuarioDAO.loginUsuario(nombreUsuario, contrasena);
+        ClienteSocket cliente = new ClienteSocket();
 
-        if (usuario != null) {
-            Sesion.iniciarSesion(usuario);
+        try {
+            cliente.conectar();
+            Usuario usuario = cliente.login(nombreUsuario, contrasena);
 
-            VistaInicio inicio = new VistaInicio();
-            inicio.configurarSegunRol();
-            inicio.setVisible(true);
+            if (usuario != null) {
+                Sesion.iniciarSesion(usuario);
 
-            vista.dispose();
-        } else {
-            vista.mostrarMensaje("Usuario o contraseña incorrectos.");
+                VistaInicio inicio = new VistaInicio();
+                inicio.configurarSegunRol();
+                inicio.setVisible(true);
+
+                vista.dispose();
+            } else {
+                vista.mostrarMensaje("Usuario o contraseña incorrectos.");
+            }
+        } catch (Exception ex) {
+            vista.mostrarMensaje("No se pudo conectar al servidor.");
+            JOptionPane.showMessageDialog(
+                    vista,
+                    "No se pudo conectar al servidor.\n"
+                            + "Asegúrese de que el Servidor esté en ejecución (puerto 5200).\n"
+                            + ex.getMessage(),
+                    "Error de conexión",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        } finally {
+            try {
+                cliente.desconectar();
+            } catch (Exception ignored) {
+                // Si falló la conexión, no hay nada que cerrar.
+            }
         }
     }
 }

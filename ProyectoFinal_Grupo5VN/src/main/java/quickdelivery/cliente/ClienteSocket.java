@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import quickdelivery.modelos.Paquete;
+import quickdelivery.modelos.Usuario;
 import quickdelivery.protocolo.Protocolo;
 
 /**
@@ -36,6 +37,27 @@ public class ClienteSocket {
             entrada.readUTF();
         }
         cerrar();
+    }
+
+    public Usuario login(String nombreUsuario, String contrasena) throws IOException {
+        salida.writeUTF(Protocolo.LOGIN);
+        salida.writeUTF(nombreUsuario);
+        salida.writeUTF(contrasena);
+        salida.flush();
+
+        String respuesta = entrada.readUTF();
+        if (!respuesta.equals(Protocolo.OK)) {
+            entrada.readUTF();
+            return null;
+        }
+
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(entrada.readLong());
+        usuario.setNombreUsuario(entrada.readUTF());
+        usuario.setNombreCompleto(entrada.readUTF());
+        usuario.setEmail(entrada.readUTF());
+        usuario.setIdRol(entrada.readInt());
+        return usuario;
     }
 
     public List<Paquete> listarPaquetes() throws IOException {

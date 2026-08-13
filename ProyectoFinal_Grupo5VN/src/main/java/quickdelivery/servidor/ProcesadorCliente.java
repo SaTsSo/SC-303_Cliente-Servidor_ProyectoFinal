@@ -7,7 +7,9 @@ import java.net.Socket;
 import java.util.List;
 import quickdelivery.protocolo.Protocolo;
 import quickdelivery.dao.PaqueteDAO;
+import quickdelivery.dao.UsuarioDAO;
 import quickdelivery.modelos.Paquete;
+import quickdelivery.modelos.Usuario;
 
 public class ProcesadorCliente implements Runnable {
 
@@ -15,10 +17,12 @@ public class ProcesadorCliente implements Runnable {
     private DataInputStream entrada;
     private DataOutputStream salida;
     private PaqueteDAO paqueteDAO;
+    private UsuarioDAO usuarioDAO;
 
     public ProcesadorCliente(Socket cliente) {
         this.cliente = cliente;
         this.paqueteDAO = new PaqueteDAO();
+        this.usuarioDAO = new UsuarioDAO();
     }
 
     public void procesar() {
@@ -39,6 +43,10 @@ public class ProcesadorCliente implements Runnable {
 
                 try {
                     switch (solicitud) {
+
+                        case Protocolo.LOGIN:
+                            login();
+                            break;
 
                         case Protocolo.LISTAR_PAQUETES:
                             listarPaquetes();
@@ -129,6 +137,27 @@ public class ProcesadorCliente implements Runnable {
                 );
             }
         }
+    }
+
+    private void login() throws IOException {
+        String nombreUsuario = entrada.readUTF();
+        String contrasena = entrada.readUTF();
+
+        Usuario usuario = usuarioDAO.loginUsuario(nombreUsuario, contrasena);
+
+        if (usuario != null) {
+            salida.writeUTF(Protocolo.OK);
+            salida.writeLong(usuario.getIdUsuario());
+            salida.writeUTF(nuloAVacio(usuario.getNombreUsuario()));
+            salida.writeUTF(nuloAVacio(usuario.getNombreCompleto()));
+            salida.writeUTF(nuloAVacio(usuario.getEmail()));
+            salida.writeInt(usuario.getIdRol());
+        } else {
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("Usuario o contraseña incorrectos.");
+        }
+
+        salida.flush();
     }
 
     private void listarPaquetes() throws IOException {
