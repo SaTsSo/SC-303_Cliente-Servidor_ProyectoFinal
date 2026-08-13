@@ -114,7 +114,7 @@ public class VistaVehiculos extends JFrame {
     }
 
     private JScrollPane crearTabla() {
-        String[] cols = {"ID", "Placa", "Marca", "Modelo", "Tipo", "Disponible"};
+        String[] cols = {"ID", "Placa", "Marca", "Modelo", "Tipo", "Capacidad", "Disponible"};
         modeloTabla = new DefaultTableModel(cols, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {

@@ -6,6 +6,7 @@ import javax.swing.event.ListSelectionEvent;
 import quickdelivery.cliente.ClienteSocket;
 import quickdelivery.cliente.ClienteVehiculo;
 import quickdelivery.modelos.Vehiculo;
+import quickdelivery.modelos.VehiculoFactory;
 import quickdelivery.vista.VistaVehiculos;
 
 public class ControladorVehiculos {
@@ -32,9 +33,15 @@ public class ControladorVehiculos {
         List<Vehiculo> lista = cliente.listarVehiculos();
         vista.limpiarTabla();
         for (Vehiculo v : lista) {
+            // Polimorfismo: cada hijo responde distinto
             vista.agregarFila(new Object[]{
-                v.getIdVehiculo(), v.getPlaca(), v.getMarca(),
-                v.getModelo(), v.getIdTipoVehiculo(), v.getDisponible()
+                v.getIdVehiculo(),
+                v.getPlaca(),
+                v.getMarca(),
+                v.getModelo(),
+                v.obtenerNombreTipo(),
+                v.obtenerCapacidad(),
+                v.getDisponible()
             });
         }
         vista.mostrarMensaje("Se listaron " + lista.size() + " vehículo(s).");
@@ -153,18 +160,30 @@ public class ControladorVehiculos {
         if (fila < 0) {
             return;
         }
+
+        String nombreTipo = vista.getTabla().getValueAt(fila, 4).toString();
+        int idTipo = 1;
+        if (nombreTipo.equalsIgnoreCase("Furgoneta")) {
+            idTipo = 2;
+        } else if (nombreTipo.equalsIgnoreCase("Camion")) {
+            idTipo = 3;
+        } else if (nombreTipo.equalsIgnoreCase("Carro")) {
+            idTipo = 4;
+        }
+
         vista.cargarEnFormulario(
                 Long.parseLong(vista.getTabla().getValueAt(fila, 0).toString()),
                 vista.getTabla().getValueAt(fila, 1).toString(),
                 vista.getTabla().getValueAt(fila, 2).toString(),
                 vista.getTabla().getValueAt(fila, 3).toString(),
-                Integer.parseInt(vista.getTabla().getValueAt(fila, 4).toString()),
-                vista.getTabla().getValueAt(fila, 5).toString()
+                idTipo,
+                vista.getTabla().getValueAt(fila, 6).toString()
         );
     }
 
     private Vehiculo leerFormulario(boolean requiereId) {
-        Vehiculo v = new Vehiculo();
+        int idTipo = vista.getIdTipoSeleccionado();
+        Vehiculo v = VehiculoFactory.crear(idTipo);
 
         if (requiereId) {
             v.setIdVehiculo(Long.parseLong(vista.getTxtId().getText().trim()));
@@ -178,7 +197,6 @@ public class ControladorVehiculos {
         v.setPlaca(placa);
         v.setMarca(vista.getTxtMarca().getText().trim());
         v.setModelo(vista.getTxtModelo().getText().trim());
-        v.setIdTipoVehiculo(vista.getIdTipoSeleccionado());
         v.setDisponible(vista.getDisponibleSeleccionado());
         return v;
     }

@@ -58,6 +58,8 @@ public class ControladorSeguimiento {
                     v.getPlaca(),
                     v.getMarca(),
                     v.getModelo(),
+                    v.obtenerNombreTipo(),
+                    v.obtenerCapacidad(),
                     v.getDisponible()
                 });
             }

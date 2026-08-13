@@ -11,6 +11,7 @@ import quickdelivery.modelos.Paquete;
 import quickdelivery.modelos.Ubicacion;
 import quickdelivery.modelos.Usuario;
 import quickdelivery.modelos.Vehiculo;
+import quickdelivery.modelos.VehiculoFactory;
 import quickdelivery.protocolo.Protocolo;
 
 /**
@@ -344,13 +345,19 @@ public class ClienteSocket {
     }
 
     private Vehiculo leerVehiculo() throws IOException {
-        Vehiculo v = new Vehiculo();
-        v.setIdVehiculo(entrada.readLong());
-        v.setPlaca(entrada.readUTF());
-        v.setMarca(entrada.readUTF());
-        v.setModelo(entrada.readUTF());
-        v.setIdTipoVehiculo(entrada.readInt());
-        v.setDisponible(entrada.readUTF());
+        long id = entrada.readLong();
+        String placa = entrada.readUTF();
+        String marca = entrada.readUTF();
+        String modelo = entrada.readUTF();
+        int idTipo = entrada.readInt();
+        String disponible = entrada.readUTF();
+
+        Vehiculo v = VehiculoFactory.crear(idTipo);
+        v.setIdVehiculo(id);
+        v.setPlaca(placa);
+        v.setMarca(marca);
+        v.setModelo(modelo);
+        v.setDisponible(disponible);
         return v;
     }
 

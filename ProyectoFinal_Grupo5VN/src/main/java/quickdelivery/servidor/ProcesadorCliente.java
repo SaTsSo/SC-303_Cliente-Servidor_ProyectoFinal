@@ -15,6 +15,7 @@ import quickdelivery.modelos.Paquete;
 import quickdelivery.modelos.Ubicacion;
 import quickdelivery.modelos.Usuario;
 import quickdelivery.modelos.Vehiculo;
+import quickdelivery.modelos.VehiculoFactory;
 
 public class ProcesadorCliente implements Runnable {
 
@@ -402,12 +403,17 @@ public class ProcesadorCliente implements Runnable {
     }
 
     private void insertarVehiculo() throws IOException {
-        Vehiculo v = new Vehiculo();
-        v.setPlaca(entrada.readUTF());
-        v.setMarca(entrada.readUTF());
-        v.setModelo(entrada.readUTF());
-        v.setIdTipoVehiculo(entrada.readInt());
-        v.setDisponible(entrada.readUTF());
+        String placa = entrada.readUTF();
+        String marca = entrada.readUTF();
+        String modelo = entrada.readUTF();
+        int idTipo = entrada.readInt();
+        String disponible = entrada.readUTF();
+
+        Vehiculo v = VehiculoFactory.crear(idTipo);
+        v.setPlaca(placa);
+        v.setMarca(marca);
+        v.setModelo(modelo);
+        v.setDisponible(disponible);
 
         if (v.getPlaca() == null || v.getPlaca().trim().isEmpty()) {
             salida.writeUTF(Protocolo.ERROR);
@@ -415,19 +421,25 @@ public class ProcesadorCliente implements Runnable {
         } else {
             vehiculoDAO.insertar(v);
             salida.writeUTF(Protocolo.OK);
-            salida.writeUTF("Vehículo insertado.");
+            salida.writeUTF("Vehículo insertado (" + v.obtenerResumen() + ").");
         }
         salida.flush();
     }
 
     private void modificarVehiculo() throws IOException {
-        Vehiculo v = new Vehiculo();
-        v.setIdVehiculo(entrada.readLong());
-        v.setPlaca(entrada.readUTF());
-        v.setMarca(entrada.readUTF());
-        v.setModelo(entrada.readUTF());
-        v.setIdTipoVehiculo(entrada.readInt());
-        v.setDisponible(entrada.readUTF());
+        long id = entrada.readLong();
+        String placa = entrada.readUTF();
+        String marca = entrada.readUTF();
+        String modelo = entrada.readUTF();
+        int idTipo = entrada.readInt();
+        String disponible = entrada.readUTF();
+
+        Vehiculo v = VehiculoFactory.crear(idTipo);
+        v.setIdVehiculo(id);
+        v.setPlaca(placa);
+        v.setMarca(marca);
+        v.setModelo(modelo);
+        v.setDisponible(disponible);
 
         if (vehiculoDAO.consultarPorId(v.getIdVehiculo()) == null) {
             salida.writeUTF(Protocolo.ERROR);
@@ -435,7 +447,7 @@ public class ProcesadorCliente implements Runnable {
         } else {
             vehiculoDAO.modificar(v);
             salida.writeUTF(Protocolo.OK);
-            salida.writeUTF("Vehículo modificado.");
+            salida.writeUTF("Vehículo modificado (" + v.obtenerResumen() + ").");
         }
         salida.flush();
     }

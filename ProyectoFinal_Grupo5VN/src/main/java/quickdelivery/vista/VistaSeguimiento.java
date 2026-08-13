@@ -36,7 +36,7 @@ public class VistaSeguimiento extends JFrame {
         centro.add(crearPanelTabla("Paquetes",
                 new String[]{"ID", "Descripción", "Origen", "Destino", "Estado"}, true));
         centro.add(crearPanelTabla("Vehículos",
-                new String[]{"ID", "Placa", "Marca", "Modelo", "Disponible"}, false));
+                new String[]{"ID", "Placa", "Marca", "Modelo", "Tipo", "Capacidad", "Disponible"}, false));
         centro.add(crearPanelTabla("Ubicaciones recientes",
                 new String[]{"ID", "ID Vehículo", "Latitud", "Longitud", "Fecha"}, null));
         add(centro, BorderLayout.CENTER);

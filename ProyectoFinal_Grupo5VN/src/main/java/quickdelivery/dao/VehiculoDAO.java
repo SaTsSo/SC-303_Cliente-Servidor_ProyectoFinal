@@ -190,12 +190,12 @@ public class VehiculoDAO {
     }
 
     private Vehiculo mapear(ResultSet rs) throws SQLException {
-        Vehiculo v = new Vehiculo();
+        int idTipo = rs.getInt("idTipoVehiculo");
+        Vehiculo v = VehiculoFactory.crear(idTipo);
         v.setIdVehiculo(rs.getLong("idVehiculo"));
         v.setPlaca(rs.getString("placa"));
         v.setMarca(rs.getString("marca"));
         v.setModelo(rs.getString("modelo"));
-        v.setIdTipoVehiculo(rs.getInt("idTipoVehiculo"));
         v.setDisponible(rs.getString("disponible"));
         return v;
     }
