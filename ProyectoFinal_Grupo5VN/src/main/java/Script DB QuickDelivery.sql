@@ -148,9 +148,9 @@ INSERT INTO Roles (nombreRol) VALUES ("Administrador");
 INSERT INTO Roles (nombreRol) VALUES ("Despachador");
 INSERT INTO Roles (nombreRol) VALUES ("Conductor");
 
-INSERT INTO TiposVehiculo (nombreTipo, capacidadCarga) VALUES ("Moto", "20kg");
-INSERT INTO TiposVehiculo (nombreTipo, capacidadCarga) VALUES ("Furgoneta", "500kg");
+INSERT INTO TiposVehiculo (nombreTipo, capacidadCarga) VALUES ("Carro", "500kg");
 INSERT INTO TiposVehiculo (nombreTipo, capacidadCarga) VALUES ("Camion", "2000kg");
+INSERT INTO TiposVehiculo (nombreTipo, capacidadCarga) VALUES ("Moto", "20kg");
 
 INSERT INTO EstadosPaquete (nombreEstado) VALUES ("Pendiente");
 INSERT INTO EstadosPaquete (nombreEstado) VALUES ("En transito");

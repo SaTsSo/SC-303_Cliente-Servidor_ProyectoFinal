@@ -17,9 +17,9 @@ import javax.swing.table.DefaultTableModel;
 public class VistaVehiculos extends JFrame {
 
     public static final String[] TIPOS = {
-        "1 - Moto",
-        "2 - Furgoneta",
-        "3 - Camion"
+        "1 - Carro",
+        "2 - Camion",
+        "3 - Moto"
     };
 
     public static final String[] DISPONIBLE = {"SI", "NO"};
