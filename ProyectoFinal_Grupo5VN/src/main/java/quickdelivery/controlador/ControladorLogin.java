@@ -1,33 +1,34 @@
 package quickdelivery.controlador;
 
-import quickdelivery.GUI.Inicio;
-import quickdelivery.GUI.Login;
 import quickdelivery.dao.UsuarioDAO;
 import quickdelivery.modelos.Sesion;
 import quickdelivery.modelos.Usuario;
-import quickdelivery.util.Roles;
+import quickdelivery.vista.VistaInicio;
+import quickdelivery.vista.VistaLogin;
 
 public class ControladorLogin {
-    private Login vista;
-    private UsuarioDAO usuarioDAO;
 
-    public ControladorLogin(Login vista) {
+    private final VistaLogin vista;
+    private final UsuarioDAO usuarioDAO;
+
+    public ControladorLogin(VistaLogin vista) {
         this.vista = vista;
         this.usuarioDAO = new UsuarioDAO();
-
         iniciarEventos();
     }
 
     private void iniciarEventos() {
         vista.getBtnIngresar().addActionListener(e -> iniciarSesion());
+        vista.getBtnSalir().addActionListener(e -> System.exit(0));
+        vista.getPassContra().addActionListener(e -> iniciarSesion());
     }
 
     private void iniciarSesion() {
-        String nombreUsuario = vista.getTxtUsuario().getText().trim();
-        String contrasena = new String(vista.getPassContra().getPassword());
+        String nombreUsuario = vista.getUsuario();
+        String contrasena = vista.getContrasena();
 
         if (nombreUsuario.isEmpty() || contrasena.isEmpty()) {
-            vista.getLblMensaje().setText("Complete todos los campos.");
+            vista.mostrarMensaje("Complete todos los campos.");
             return;
         }
 
@@ -36,16 +37,13 @@ public class ControladorLogin {
         if (usuario != null) {
             Sesion.iniciarSesion(usuario);
 
-            Inicio inicio = new Inicio();
+            VistaInicio inicio = new VistaInicio();
             inicio.configurarSegunRol();
             inicio.setVisible(true);
 
             vista.dispose();
-
         } else {
-
-            vista.getLblMensaje().setText("Usuario o contraseña incorrectos.");
-
+            vista.mostrarMensaje("Usuario o contraseña incorrectos.");
         }
     }
 }

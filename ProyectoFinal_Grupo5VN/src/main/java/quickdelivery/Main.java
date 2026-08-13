@@ -7,16 +7,17 @@ Yabeth Villafuerte Sotelo
 
 package quickdelivery;
 
-import quickdelivery.GUI.Login;
+import javax.swing.SwingUtilities;
 import quickdelivery.controlador.ControladorLogin;
+import quickdelivery.vista.VistaLogin;
 
 public class Main {
 
     public static void main(String[] args) {
-        Login login = new Login();
-        new ControladorLogin(login);
-        login.setVisible(true);
-
-
+        SwingUtilities.invokeLater(() -> {
+            VistaLogin login = new VistaLogin();
+            new ControladorLogin(login);
+            login.setVisible(true);
+        });
     }
 }
