@@ -83,7 +83,7 @@ public class ProcesadorCliente implements Runnable {
                     try {
                         salida.writeUTF(Protocolo.ERROR);
                         salida.writeUTF(
-                                "Error en el servidor: " + ex.getMessage()
+                                "Ocurrio un error al procesar la solicitud."
                         );
                         salida.flush();
                     } catch (IOException ignored) {
@@ -150,8 +150,15 @@ public class ProcesadorCliente implements Runnable {
         long idPaquete = entrada.readLong();
 
         System.out.println("ID recibido: " + idPaquete);
-        System.out.println("Consultando BD...");
 
+        if (idPaquete <= 0) {
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("El ID del paquete no es valido.");
+            salida.flush();
+            return;
+        }
+
+        System.out.println("Consultando BD...");
         Paquete paquete = paqueteDAO.consultarPaquetePorId(idPaquete);
 
         System.out.println("Consulta terminada");
@@ -177,6 +184,13 @@ public class ProcesadorCliente implements Runnable {
         paquete.setIdEstado(entrada.readInt());
         paquete.setFechaRegistro(entrada.readUTF());
 
+        if (!validarDatosPaquete(paquete)) {
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("Los datos ingresados no son validos.");
+            salida.flush();
+            return;
+        }
+
         paqueteDAO.insertarPaquete(paquete);
 
         salida.writeUTF(Protocolo.OK);
@@ -192,6 +206,15 @@ public class ProcesadorCliente implements Runnable {
         paquete.setDireccionOrigen(entrada.readUTF());
         paquete.setDireccionDestino(entrada.readUTF());
         paquete.setPeso(entrada.readUTF());
+
+        if (paquete.getIdPaquete() <= 0
+                || !validarDatosPaquete(paquete)) {
+
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("Los datos ingresados no son validos.");
+            salida.flush();
+            return;
+        }
 
         Paquete existente = paqueteDAO.consultarPaquetePorId(paquete.getIdPaquete());
 
@@ -212,6 +235,13 @@ public class ProcesadorCliente implements Runnable {
         long idPaquete = entrada.readLong();
         int idEstado = entrada.readInt();
 
+        if (idPaquete <= 0 || idEstado < 1 || idEstado > 4) {
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("Los datos ingresados no son validos.");
+            salida.flush();
+            return;
+        }
+
         Paquete existente = paqueteDAO.consultarPaquetePorId(idPaquete);
 
         if (existente == null) {
@@ -230,6 +260,13 @@ public class ProcesadorCliente implements Runnable {
 
         long idPaquete = entrada.readLong();
 
+        if (idPaquete <= 0) {
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("El ID del paquete no es valido.");
+            salida.flush();
+            return;
+        }
+
         Paquete existente = paqueteDAO.consultarPaquetePorId(idPaquete);
 
         if (existente == null) {
@@ -243,7 +280,37 @@ public class ProcesadorCliente implements Runnable {
 
         salida.flush();
     }
+    private boolean validarDatosPaquete(Paquete paquete) {
 
+        if (paquete == null) {
+            return false;
+        }
+
+        if (paquete.getDescripcion() == null
+                || paquete.getDescripcion().trim().isEmpty()
+                || paquete.getDescripcion().length() > 255) {
+            return false;
+        }
+
+        if (paquete.getDireccionOrigen() == null
+                || paquete.getDireccionOrigen().trim().isEmpty()
+                || paquete.getDireccionOrigen().length() > 255) {
+            return false;
+        }
+
+        if (paquete.getDireccionDestino() == null
+                || paquete.getDireccionDestino().trim().isEmpty()
+                || paquete.getDireccionDestino().length() > 255) {
+            return false;
+        }
+
+        if (paquete.getPeso() != null
+                && paquete.getPeso().length() > 20) {
+            return false;
+        }
+
+        return true;
+    }
     private void escribirPaquete(Paquete paquete) throws IOException {
         salida.writeLong(paquete.getIdPaquete());
         salida.writeUTF(nuloAVacio(paquete.getDescripcion()));
