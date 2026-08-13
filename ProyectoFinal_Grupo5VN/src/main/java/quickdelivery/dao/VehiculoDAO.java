@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import quickdelivery.bd.ConexionBD;
+import quickdelivery.modelos.Ubicacion;
 import quickdelivery.modelos.Vehiculo;
 
 public class VehiculoDAO {
@@ -141,6 +142,33 @@ public class VehiculoDAO {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage(), e);
         }
+    }
+
+    // Últimas ubicaciones (las más recientes primero)
+    public List<Ubicacion> listarUbicaciones() {
+        List<Ubicacion> lista = new ArrayList<>();
+        conexion.setConexion();
+        conexion.setConsulta(
+                "SELECT idUbicacion, idVehiculo, latitud, longitud, fechaHora "
+                        + "FROM UbicacionesVehiculos ORDER BY idUbicacion DESC LIMIT 50"
+        );
+
+        try {
+            resultado = conexion.getResultado();
+            while (resultado.next()) {
+                Ubicacion u = new Ubicacion();
+                u.setIdUbicacion(resultado.getLong("idUbicacion"));
+                u.setIdVehiculo(resultado.getLong("idVehiculo"));
+                u.setLatitud(resultado.getString("latitud"));
+                u.setLongitud(resultado.getString("longitud"));
+                u.setFechaHora(resultado.getString("fechaHora"));
+                lista.add(u);
+            }
+            conexion.cerrarConexion();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
     }
 
     public void asignarConductor(long idUsuario, String licencia, long idVehiculo) {

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import quickdelivery.modelos.Asignacion;
 import quickdelivery.modelos.Paquete;
+import quickdelivery.modelos.Ubicacion;
 import quickdelivery.modelos.Usuario;
 import quickdelivery.modelos.Vehiculo;
 import quickdelivery.protocolo.Protocolo;
@@ -242,6 +243,29 @@ public class ClienteSocket {
         salida.writeLong(id);
         salida.flush();
         leerRespuestaSimple();
+    }
+
+    public List<Ubicacion> listarUbicaciones() throws IOException {
+        salida.writeUTF(Protocolo.LISTAR_UBICACIONES);
+        salida.flush();
+
+        String respuesta = entrada.readUTF();
+        if (!respuesta.equals(Protocolo.OK)) {
+            throw new IOException(entrada.readUTF());
+        }
+
+        int cantidad = entrada.readInt();
+        List<Ubicacion> lista = new ArrayList<>();
+        for (int i = 0; i < cantidad; i++) {
+            Ubicacion u = new Ubicacion();
+            u.setIdUbicacion(entrada.readLong());
+            u.setIdVehiculo(entrada.readLong());
+            u.setLatitud(entrada.readUTF());
+            u.setLongitud(entrada.readUTF());
+            u.setFechaHora(entrada.readUTF());
+            lista.add(u);
+        }
+        return lista;
     }
 
     public List<Paquete> listarPaquetes() throws IOException {

@@ -12,6 +12,7 @@ import quickdelivery.dao.UsuarioDAO;
 import quickdelivery.dao.VehiculoDAO;
 import quickdelivery.modelos.Asignacion;
 import quickdelivery.modelos.Paquete;
+import quickdelivery.modelos.Ubicacion;
 import quickdelivery.modelos.Usuario;
 import quickdelivery.modelos.Vehiculo;
 
@@ -114,6 +115,10 @@ public class ProcesadorCliente implements Runnable {
 
                         case Protocolo.ELIMINAR_ASIGNACION:
                             eliminarAsignacion();
+                            break;
+
+                        case Protocolo.LISTAR_UBICACIONES:
+                            listarUbicaciones();
                             break;
 
                         case Protocolo.LISTAR_PAQUETES:
@@ -522,6 +527,20 @@ public class ProcesadorCliente implements Runnable {
         asignacionDAO.eliminar(id);
         salida.writeUTF(Protocolo.OK);
         salida.writeUTF("Asignación eliminada.");
+        salida.flush();
+    }
+
+    private void listarUbicaciones() throws IOException {
+        List<Ubicacion> lista = vehiculoDAO.listarUbicaciones();
+        salida.writeUTF(Protocolo.OK);
+        salida.writeInt(lista.size());
+        for (Ubicacion u : lista) {
+            salida.writeLong(u.getIdUbicacion());
+            salida.writeLong(u.getIdVehiculo());
+            salida.writeUTF(nuloAVacio(u.getLatitud()));
+            salida.writeUTF(nuloAVacio(u.getLongitud()));
+            salida.writeUTF(nuloAVacio(u.getFechaHora()));
+        }
         salida.flush();
     }
 
