@@ -14,7 +14,7 @@ public class ConexionBD {
 
     String url = "jdbc:mysql://localhost:3306/QuickDelivery";
     String username = "root";
-    String password = "1234";
+    String password = "password";
 
 
     //Métodos para la conexión a la BD
