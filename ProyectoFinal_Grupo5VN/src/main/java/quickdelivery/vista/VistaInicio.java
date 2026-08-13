@@ -16,14 +16,12 @@ import quickdelivery.cliente.ClienteSocket;
 import quickdelivery.controlador.ControladorAsignaciones;
 import quickdelivery.controlador.ControladorLogin;
 import quickdelivery.controlador.ControladorPaquetes;
+import quickdelivery.controlador.ControladorSeguimiento;
 import quickdelivery.controlador.ControladorUsuarios;
 import quickdelivery.controlador.ControladorVehiculos;
 import quickdelivery.modelos.Sesion;
 import quickdelivery.util.Permisos;
 
-/**
- * Vista (MVC): menú principal en código (sin GUI Designer).
- */
 public class VistaInicio extends JFrame {
 
     private JLabel lblEmpresa;
@@ -119,10 +117,38 @@ public class VistaInicio extends JFrame {
         btnUsuarios.addActionListener(e -> abrirUsuarios());
         btnVehiculos.addActionListener(e -> abrirVehiculos());
         btnAsignaciones.addActionListener(e -> abrirAsignaciones());
+        btnSeguimiento.addActionListener(e -> abrirSeguimiento());
+    }
 
-        btnSeguimiento.addActionListener(e ->
-                JOptionPane.showMessageDialog(this, "Módulo de seguimiento pendiente (compañero 4).")
-        );
+    private void abrirSeguimiento() {
+        try {
+            ClienteSocket cliente = new ClienteSocket();
+            cliente.conectar();
+
+            VistaSeguimiento vista = new VistaSeguimiento();
+            ControladorSeguimiento controlador = new ControladorSeguimiento(vista, cliente);
+
+            vista.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosing(java.awt.event.WindowEvent e) {
+                    controlador.detener();
+                    try {
+                        cliente.desconectar();
+                    } catch (Exception ex) {
+                        System.out.println("Error al desconectar: " + ex.getMessage());
+                    }
+                }
+            });
+
+            vista.setVisible(true);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "No se pudo conectar al servidor.\n" + ex.getMessage(),
+                    "Error de conexión",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
     }
 
     private void abrirVehiculos() {

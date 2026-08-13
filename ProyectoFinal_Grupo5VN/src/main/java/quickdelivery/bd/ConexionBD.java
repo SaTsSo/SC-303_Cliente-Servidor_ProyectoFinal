@@ -16,8 +16,7 @@ public class ConexionBD {
     String username = "root";
     String password = "1234";
 
-
-    //Métodos para la conexión a la BD
+    // conexión a la BD
     public void setConsulta(String sql) {
         try {
             if (conexion == null) {

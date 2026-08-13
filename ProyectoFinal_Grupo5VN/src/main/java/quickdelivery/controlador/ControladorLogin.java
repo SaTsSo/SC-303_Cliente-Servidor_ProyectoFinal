@@ -62,7 +62,6 @@ public class ControladorLogin {
             try {
                 cliente.desconectar();
             } catch (Exception ignored) {
-                // Si falló la conexión, no hay nada que cerrar.
             }
         }
     }

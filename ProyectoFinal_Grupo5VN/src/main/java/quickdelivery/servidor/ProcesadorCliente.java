@@ -12,8 +12,10 @@ import quickdelivery.dao.UsuarioDAO;
 import quickdelivery.dao.VehiculoDAO;
 import quickdelivery.modelos.Asignacion;
 import quickdelivery.modelos.Paquete;
+import quickdelivery.modelos.Ubicacion;
 import quickdelivery.modelos.Usuario;
 import quickdelivery.modelos.Vehiculo;
+import quickdelivery.modelos.VehiculoFactory;
 import quickdelivery.util.LogEventos;
 
 public class ProcesadorCliente implements Runnable {
@@ -115,6 +117,10 @@ public class ProcesadorCliente implements Runnable {
 
                         case Protocolo.ELIMINAR_ASIGNACION:
                             eliminarAsignacion();
+                            break;
+
+                        case Protocolo.LISTAR_UBICACIONES:
+                            listarUbicaciones();
                             break;
 
                         case Protocolo.LISTAR_PAQUETES:
@@ -408,12 +414,17 @@ public class ProcesadorCliente implements Runnable {
     }
 
     private void insertarVehiculo() throws IOException {
-        Vehiculo v = new Vehiculo();
-        v.setPlaca(entrada.readUTF());
-        v.setMarca(entrada.readUTF());
-        v.setModelo(entrada.readUTF());
-        v.setIdTipoVehiculo(entrada.readInt());
-        v.setDisponible(entrada.readUTF());
+        String placa = entrada.readUTF();
+        String marca = entrada.readUTF();
+        String modelo = entrada.readUTF();
+        int idTipo = entrada.readInt();
+        String disponible = entrada.readUTF();
+
+        Vehiculo v = VehiculoFactory.crear(idTipo);
+        v.setPlaca(placa);
+        v.setMarca(marca);
+        v.setModelo(modelo);
+        v.setDisponible(disponible);
 
         if (v.getPlaca() == null || v.getPlaca().trim().isEmpty()) {
             salida.writeUTF(Protocolo.ERROR);
@@ -422,19 +433,25 @@ public class ProcesadorCliente implements Runnable {
             vehiculoDAO.insertar(v);
             LogEventos.registrar("Vehículo insertado: " + v.getPlaca());
             salida.writeUTF(Protocolo.OK);
-            salida.writeUTF("Vehículo insertado.");
+            salida.writeUTF("Vehículo insertado (" + v.obtenerResumen() + ").");
         }
         salida.flush();
     }
 
     private void modificarVehiculo() throws IOException {
-        Vehiculo v = new Vehiculo();
-        v.setIdVehiculo(entrada.readLong());
-        v.setPlaca(entrada.readUTF());
-        v.setMarca(entrada.readUTF());
-        v.setModelo(entrada.readUTF());
-        v.setIdTipoVehiculo(entrada.readInt());
-        v.setDisponible(entrada.readUTF());
+        long id = entrada.readLong();
+        String placa = entrada.readUTF();
+        String marca = entrada.readUTF();
+        String modelo = entrada.readUTF();
+        int idTipo = entrada.readInt();
+        String disponible = entrada.readUTF();
+
+        Vehiculo v = VehiculoFactory.crear(idTipo);
+        v.setIdVehiculo(id);
+        v.setPlaca(placa);
+        v.setMarca(marca);
+        v.setModelo(modelo);
+        v.setDisponible(disponible);
 
         if (vehiculoDAO.consultarPorId(v.getIdVehiculo()) == null) {
             salida.writeUTF(Protocolo.ERROR);
@@ -443,7 +460,7 @@ public class ProcesadorCliente implements Runnable {
             vehiculoDAO.modificar(v);
             LogEventos.registrar("Vehículo modificado: idVehiculo=" + v.getIdVehiculo());
             salida.writeUTF(Protocolo.OK);
-            salida.writeUTF("Vehículo modificado.");
+            salida.writeUTF("Vehículo modificado (" + v.obtenerResumen() + ").");
         }
         salida.flush();
     }
@@ -541,6 +558,20 @@ public class ProcesadorCliente implements Runnable {
         LogEventos.registrar("Asignación eliminada: idAsignacion=" + id);
         salida.writeUTF(Protocolo.OK);
         salida.writeUTF("Asignación eliminada.");
+        salida.flush();
+    }
+
+    private void listarUbicaciones() throws IOException {
+        List<Ubicacion> lista = vehiculoDAO.listarUbicaciones();
+        salida.writeUTF(Protocolo.OK);
+        salida.writeInt(lista.size());
+        for (Ubicacion u : lista) {
+            salida.writeLong(u.getIdUbicacion());
+            salida.writeLong(u.getIdVehiculo());
+            salida.writeUTF(nuloAVacio(u.getLatitud()));
+            salida.writeUTF(nuloAVacio(u.getLongitud()));
+            salida.writeUTF(nuloAVacio(u.getFechaHora()));
+        }
         salida.flush();
     }
 

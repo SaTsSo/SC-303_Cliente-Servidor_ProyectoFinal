@@ -8,9 +8,6 @@ import quickdelivery.cliente.ClienteSocket;
 import quickdelivery.modelos.Paquete;
 import quickdelivery.vista.VistaPaquetes;
 
-/**
- * Controlador (MVC): conecta la Vista con el Modelo (Paquete + ClienteSocket).
- */
 public class ControladorPaquetes {
 
     private final VistaPaquetes vista;
@@ -215,7 +212,7 @@ public class ControladorPaquetes {
             if (pesoNumero <= 0) {
                 throw new IllegalArgumentException("El peso debe ser mayor que 0.");
             }
-            // Guarda el número limpio (ej. 10.5)
+            // deja el peso solo como número
             if (pesoNumero == Math.rint(pesoNumero)) {
                 paquete.setPeso(String.valueOf((long) pesoNumero));
             } else {

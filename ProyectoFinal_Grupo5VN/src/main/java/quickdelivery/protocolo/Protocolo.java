@@ -28,6 +28,7 @@ public class Protocolo {
     public static final String LISTAR_ASIGNACIONES = "LISTAR_ASIGNACIONES";
     public static final String INSERTAR_ASIGNACION = "INSERTAR_ASIGNACION";
     public static final String ELIMINAR_ASIGNACION = "ELIMINAR_ASIGNACION";
+    public static final String LISTAR_UBICACIONES = "LISTAR_UBICACIONES";
 
     public static final String DESCONECTAR = "DESCONECTAR";
 

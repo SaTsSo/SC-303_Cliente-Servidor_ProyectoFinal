@@ -8,10 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import quickdelivery.protocolo.Protocolo;
 
-/**
- * Cada vehículo corre en su propio hilo.
- * Lógica simple: se conecta, manda 3 ubicaciones y se desconecta.
- */
+// hilo de un vehículo
 public class ClienteVehiculo implements Runnable {
 
     private int idVehiculo;

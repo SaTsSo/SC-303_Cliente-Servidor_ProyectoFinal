@@ -7,9 +7,6 @@ import quickdelivery.cliente.ClienteSocket;
 import quickdelivery.modelos.Usuario;
 import quickdelivery.vista.VistaUsuarios;
 
-/**
- * Controlador (MVC): CRUD de usuarios vía sockets.
- */
 public class ControladorUsuarios {
 
     private final VistaUsuarios vista;

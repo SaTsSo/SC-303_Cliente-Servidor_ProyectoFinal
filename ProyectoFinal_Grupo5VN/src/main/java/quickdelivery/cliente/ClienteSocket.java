@@ -8,14 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import quickdelivery.modelos.Asignacion;
 import quickdelivery.modelos.Paquete;
+import quickdelivery.modelos.Ubicacion;
 import quickdelivery.modelos.Usuario;
 import quickdelivery.modelos.Vehiculo;
+import quickdelivery.modelos.VehiculoFactory;
 import quickdelivery.protocolo.Protocolo;
 
-/**
- * Cliente socket usado por la capa Modelo/Controlador de la GUI
- * para enviar y recibir operaciones CRUD según el protocolo.
- */
+// cliente socket
 public class ClienteSocket {
 
     private static final String HOST = "127.0.0.1";
@@ -244,6 +243,29 @@ public class ClienteSocket {
         leerRespuestaSimple();
     }
 
+    public List<Ubicacion> listarUbicaciones() throws IOException {
+        salida.writeUTF(Protocolo.LISTAR_UBICACIONES);
+        salida.flush();
+
+        String respuesta = entrada.readUTF();
+        if (!respuesta.equals(Protocolo.OK)) {
+            throw new IOException(entrada.readUTF());
+        }
+
+        int cantidad = entrada.readInt();
+        List<Ubicacion> lista = new ArrayList<>();
+        for (int i = 0; i < cantidad; i++) {
+            Ubicacion u = new Ubicacion();
+            u.setIdUbicacion(entrada.readLong());
+            u.setIdVehiculo(entrada.readLong());
+            u.setLatitud(entrada.readUTF());
+            u.setLongitud(entrada.readUTF());
+            u.setFechaHora(entrada.readUTF());
+            lista.add(u);
+        }
+        return lista;
+    }
+
     public List<Paquete> listarPaquetes() throws IOException {
         salida.writeUTF(Protocolo.LISTAR_PAQUETES);
         salida.flush();
@@ -320,13 +342,19 @@ public class ClienteSocket {
     }
 
     private Vehiculo leerVehiculo() throws IOException {
-        Vehiculo v = new Vehiculo();
-        v.setIdVehiculo(entrada.readLong());
-        v.setPlaca(entrada.readUTF());
-        v.setMarca(entrada.readUTF());
-        v.setModelo(entrada.readUTF());
-        v.setIdTipoVehiculo(entrada.readInt());
-        v.setDisponible(entrada.readUTF());
+        long id = entrada.readLong();
+        String placa = entrada.readUTF();
+        String marca = entrada.readUTF();
+        String modelo = entrada.readUTF();
+        int idTipo = entrada.readInt();
+        String disponible = entrada.readUTF();
+
+        Vehiculo v = VehiculoFactory.crear(idTipo);
+        v.setIdVehiculo(id);
+        v.setPlaca(placa);
+        v.setMarca(marca);
+        v.setModelo(modelo);
+        v.setDisponible(disponible);
         return v;
     }
 

@@ -1,5 +1,6 @@
 package quickdelivery.modelos;
 
+// clase padre
 public class Vehiculo {
 
     private long idVehiculo;
@@ -8,6 +9,18 @@ public class Vehiculo {
     private String modelo;
     private int idTipoVehiculo;
     private String disponible;
+
+    public String obtenerNombreTipo() {
+        return "Vehiculo";
+    }
+
+    public String obtenerCapacidad() {
+        return "N/D";
+    }
+
+    public String obtenerResumen() {
+        return obtenerNombreTipo() + " - capacidad: " + obtenerCapacidad();
+    }
 
     public long getIdVehiculo() {
         return idVehiculo;
