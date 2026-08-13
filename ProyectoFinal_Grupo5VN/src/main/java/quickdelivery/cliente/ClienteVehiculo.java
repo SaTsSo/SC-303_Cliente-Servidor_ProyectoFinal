@@ -1,12 +1,17 @@
 package quickdelivery.cliente;
 
-import quickdelivery.protocolo.Protocolo;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import quickdelivery.protocolo.Protocolo;
 
+/**
+ * Cada vehículo corre en su propio hilo.
+ * Lógica simple: se conecta, manda 3 ubicaciones y se desconecta.
+ */
 public class ClienteVehiculo implements Runnable {
 
     private int idVehiculo;
@@ -17,79 +22,63 @@ public class ClienteVehiculo implements Runnable {
 
     @Override
     public void run() {
-
         Socket cliente = null;
         DataInputStream entrada = null;
         DataOutputStream salida = null;
 
         try {
-
             cliente = new Socket("127.0.0.1", 5200);
-
             entrada = new DataInputStream(cliente.getInputStream());
             salida = new DataOutputStream(cliente.getOutputStream());
 
-            System.out.println("Vehículo " + idVehiculo + " conectado al servidor.");
+            System.out.println("Vehículo " + idVehiculo + " conectado.");
 
-            salida.writeUTF(Protocolo.CONSULTAR_PAQUETE);
-            salida.writeLong(1);
-            salida.flush();
+            SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
-            String respuesta = entrada.readUTF();
+            for (int i = 1; i <= 3; i++) {
+                String latitud = String.format("%.4f", 9.90 + (idVehiculo * 0.01) + (i * 0.001));
+                String longitud = String.format("%.4f", -84.10 - (idVehiculo * 0.01) - (i * 0.001));
+                String fecha = formato.format(new Date());
 
-            if (respuesta.equals(Protocolo.OK)) {
+                salida.writeUTF(Protocolo.ACTUALIZAR_UBICACION);
+                salida.writeLong(idVehiculo);
+                salida.writeUTF(latitud);
+                salida.writeUTF(longitud);
+                salida.writeUTF(fecha);
+                salida.flush();
 
-                long idPaquete = entrada.readLong();
-                String descripcion = entrada.readUTF();
-                String direccionOrigen = entrada.readUTF();
-                String direccionDestino = entrada.readUTF();
-                String peso = entrada.readUTF();
-                int idEstado = entrada.readInt();
-                String fechaRegistro = entrada.readUTF();
-
-                System.out.println("\n===== Vehículo " + idVehiculo + " =====");
-                System.out.println("Paquete encontrado:");
-                System.out.println("ID: " + idPaquete);
-                System.out.println("Descripción: " + descripcion);
-                System.out.println("Origen: " + direccionOrigen);
-                System.out.println("Destino: " + direccionDestino);
-                System.out.println("Peso: " + peso);
-                System.out.println("Estado: " + idEstado);
-                System.out.println("Fecha de registro: " + fechaRegistro);
-
-            } else {
-
+                String respuesta = entrada.readUTF();
                 String mensaje = entrada.readUTF();
-                System.out.println("Vehículo " + idVehiculo + " -> Error: " + mensaje);
+                System.out.println(
+                        "Vehículo " + idVehiculo + " ubicación " + i + ": "
+                                + respuesta + " - " + mensaje
+                );
+
+                Thread.sleep(1000);
             }
 
             salida.writeUTF(Protocolo.DESCONECTAR);
             salida.flush();
+            entrada.readUTF();
+            entrada.readUTF();
 
-            String respuestaDesconexion = entrada.readUTF();
-            String mensajeDesconexion = entrada.readUTF();
+            System.out.println("Vehículo " + idVehiculo + " finalizado.");
 
-            System.out.println("Vehículo " + idVehiculo + " -> " + respuestaDesconexion);
-            System.out.println("Vehículo " + idVehiculo + " -> " + mensajeDesconexion);
-
-        } catch (IOException ex) {
-
-            System.out.println("Error en el vehículo " + idVehiculo + ": " + ex.getMessage());
-
+        } catch (Exception ex) {
+            System.out.println("Error en vehículo " + idVehiculo + ": " + ex.getMessage());
         } finally {
-
             try {
-
-                if (entrada != null) entrada.close();
-                if (salida != null) salida.close();
-                if (cliente != null) cliente.close();
-
-                System.out.println("Vehículo " + idVehiculo + " finalizado.");
-
+                if (entrada != null) {
+                    entrada.close();
+                }
+                if (salida != null) {
+                    salida.close();
+                }
+                if (cliente != null) {
+                    cliente.close();
+                }
             } catch (IOException ex) {
-
-                System.out.println("Error al cerrar el vehículo " + idVehiculo + ": " + ex.getMessage());
-
+                System.out.println("Error al cerrar vehículo " + idVehiculo);
             }
         }
     }

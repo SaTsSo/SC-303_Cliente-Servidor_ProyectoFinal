@@ -13,9 +13,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import quickdelivery.cliente.ClienteSocket;
+import quickdelivery.controlador.ControladorAsignaciones;
 import quickdelivery.controlador.ControladorLogin;
 import quickdelivery.controlador.ControladorPaquetes;
 import quickdelivery.controlador.ControladorUsuarios;
+import quickdelivery.controlador.ControladorVehiculos;
 import quickdelivery.modelos.Sesion;
 import quickdelivery.util.Permisos;
 
@@ -115,16 +117,72 @@ public class VistaInicio extends JFrame {
 
         btnPaquetes.addActionListener(e -> abrirPaquetes());
         btnUsuarios.addActionListener(e -> abrirUsuarios());
+        btnVehiculos.addActionListener(e -> abrirVehiculos());
+        btnAsignaciones.addActionListener(e -> abrirAsignaciones());
 
-        btnVehiculos.addActionListener(e ->
-                JOptionPane.showMessageDialog(this, "Módulo de vehículos pendiente.")
-        );
-        btnAsignaciones.addActionListener(e ->
-                JOptionPane.showMessageDialog(this, "Módulo de asignaciones pendiente.")
-        );
         btnSeguimiento.addActionListener(e ->
-                JOptionPane.showMessageDialog(this, "Módulo de seguimiento pendiente.")
+                JOptionPane.showMessageDialog(this, "Módulo de seguimiento pendiente (compañero 4).")
         );
+    }
+
+    private void abrirVehiculos() {
+        try {
+            ClienteSocket cliente = new ClienteSocket();
+            cliente.conectar();
+
+            VistaVehiculos vista = new VistaVehiculos();
+            new ControladorVehiculos(vista, cliente);
+
+            vista.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosing(java.awt.event.WindowEvent e) {
+                    try {
+                        cliente.desconectar();
+                    } catch (Exception ex) {
+                        System.out.println("Error al desconectar: " + ex.getMessage());
+                    }
+                }
+            });
+
+            vista.setVisible(true);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "No se pudo conectar al servidor.\n" + ex.getMessage(),
+                    "Error de conexión",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    private void abrirAsignaciones() {
+        try {
+            ClienteSocket cliente = new ClienteSocket();
+            cliente.conectar();
+
+            VistaAsignaciones vista = new VistaAsignaciones();
+            new ControladorAsignaciones(vista, cliente);
+
+            vista.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosing(java.awt.event.WindowEvent e) {
+                    try {
+                        cliente.desconectar();
+                    } catch (Exception ex) {
+                        System.out.println("Error al desconectar: " + ex.getMessage());
+                    }
+                }
+            });
+
+            vista.setVisible(true);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "No se pudo conectar al servidor.\n" + ex.getMessage(),
+                    "Error de conexión",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
     }
 
     private void abrirUsuarios() {

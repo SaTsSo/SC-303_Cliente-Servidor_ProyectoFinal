@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import quickdelivery.modelos.Asignacion;
 import quickdelivery.modelos.Paquete;
 import quickdelivery.modelos.Usuario;
+import quickdelivery.modelos.Vehiculo;
 import quickdelivery.protocolo.Protocolo;
 
 /**
@@ -125,6 +127,123 @@ public class ClienteSocket {
         leerRespuestaSimple();
     }
 
+    public List<Vehiculo> listarVehiculos() throws IOException {
+        salida.writeUTF(Protocolo.LISTAR_VEHICULOS);
+        salida.flush();
+
+        String respuesta = entrada.readUTF();
+        if (!respuesta.equals(Protocolo.OK)) {
+            throw new IOException(entrada.readUTF());
+        }
+
+        int cantidad = entrada.readInt();
+        List<Vehiculo> lista = new ArrayList<>();
+        for (int i = 0; i < cantidad; i++) {
+            lista.add(leerVehiculo());
+        }
+        return lista;
+    }
+
+    public Vehiculo consultarVehiculo(long id) throws IOException {
+        salida.writeUTF(Protocolo.CONSULTAR_VEHICULO);
+        salida.writeLong(id);
+        salida.flush();
+
+        String respuesta = entrada.readUTF();
+        if (!respuesta.equals(Protocolo.OK)) {
+            throw new IOException(entrada.readUTF());
+        }
+        return leerVehiculo();
+    }
+
+    public void insertarVehiculo(Vehiculo vehiculo) throws IOException {
+        salida.writeUTF(Protocolo.INSERTAR_VEHICULO);
+        salida.writeUTF(vehiculo.getPlaca());
+        salida.writeUTF(vehiculo.getMarca() == null ? "" : vehiculo.getMarca());
+        salida.writeUTF(vehiculo.getModelo() == null ? "" : vehiculo.getModelo());
+        salida.writeInt(vehiculo.getIdTipoVehiculo());
+        salida.writeUTF(vehiculo.getDisponible());
+        salida.flush();
+        leerRespuestaSimple();
+    }
+
+    public void modificarVehiculo(Vehiculo vehiculo) throws IOException {
+        salida.writeUTF(Protocolo.MODIFICAR_VEHICULO);
+        salida.writeLong(vehiculo.getIdVehiculo());
+        salida.writeUTF(vehiculo.getPlaca());
+        salida.writeUTF(vehiculo.getMarca() == null ? "" : vehiculo.getMarca());
+        salida.writeUTF(vehiculo.getModelo() == null ? "" : vehiculo.getModelo());
+        salida.writeInt(vehiculo.getIdTipoVehiculo());
+        salida.writeUTF(vehiculo.getDisponible());
+        salida.flush();
+        leerRespuestaSimple();
+    }
+
+    public void eliminarVehiculo(long id) throws IOException {
+        salida.writeUTF(Protocolo.ELIMINAR_VEHICULO);
+        salida.writeLong(id);
+        salida.flush();
+        leerRespuestaSimple();
+    }
+
+    public void asignarConductor(long idUsuario, String licencia, long idVehiculo) throws IOException {
+        salida.writeUTF(Protocolo.ASIGNAR_CONDUCTOR);
+        salida.writeLong(idUsuario);
+        salida.writeUTF(licencia);
+        salida.writeLong(idVehiculo);
+        salida.flush();
+        leerRespuestaSimple();
+    }
+
+    public void actualizarUbicacion(long idVehiculo, String latitud, String longitud, String fechaHora)
+            throws IOException {
+        salida.writeUTF(Protocolo.ACTUALIZAR_UBICACION);
+        salida.writeLong(idVehiculo);
+        salida.writeUTF(latitud);
+        salida.writeUTF(longitud);
+        salida.writeUTF(fechaHora);
+        salida.flush();
+        leerRespuestaSimple();
+    }
+
+    public List<Asignacion> listarAsignaciones() throws IOException {
+        salida.writeUTF(Protocolo.LISTAR_ASIGNACIONES);
+        salida.flush();
+
+        String respuesta = entrada.readUTF();
+        if (!respuesta.equals(Protocolo.OK)) {
+            throw new IOException(entrada.readUTF());
+        }
+
+        int cantidad = entrada.readInt();
+        List<Asignacion> lista = new ArrayList<>();
+        for (int i = 0; i < cantidad; i++) {
+            Asignacion a = new Asignacion();
+            a.setIdAsignacion(entrada.readLong());
+            a.setIdPaquete(entrada.readLong());
+            a.setIdVehiculo(entrada.readLong());
+            a.setFechaAsignacion(entrada.readUTF());
+            lista.add(a);
+        }
+        return lista;
+    }
+
+    public void insertarAsignacion(Asignacion asignacion) throws IOException {
+        salida.writeUTF(Protocolo.INSERTAR_ASIGNACION);
+        salida.writeLong(asignacion.getIdPaquete());
+        salida.writeLong(asignacion.getIdVehiculo());
+        salida.writeUTF(asignacion.getFechaAsignacion());
+        salida.flush();
+        leerRespuestaSimple();
+    }
+
+    public void eliminarAsignacion(long id) throws IOException {
+        salida.writeUTF(Protocolo.ELIMINAR_ASIGNACION);
+        salida.writeLong(id);
+        salida.flush();
+        leerRespuestaSimple();
+    }
+
     public List<Paquete> listarPaquetes() throws IOException {
         salida.writeUTF(Protocolo.LISTAR_PAQUETES);
         salida.flush();
@@ -198,6 +317,17 @@ public class ClienteSocket {
         usuario.setEmail(entrada.readUTF());
         usuario.setIdRol(entrada.readInt());
         return usuario;
+    }
+
+    private Vehiculo leerVehiculo() throws IOException {
+        Vehiculo v = new Vehiculo();
+        v.setIdVehiculo(entrada.readLong());
+        v.setPlaca(entrada.readUTF());
+        v.setMarca(entrada.readUTF());
+        v.setModelo(entrada.readUTF());
+        v.setIdTipoVehiculo(entrada.readInt());
+        v.setDisponible(entrada.readUTF());
+        return v;
     }
 
     private Paquete leerPaquete() throws IOException {

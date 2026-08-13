@@ -6,10 +6,14 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
 import quickdelivery.protocolo.Protocolo;
+import quickdelivery.dao.AsignacionDAO;
 import quickdelivery.dao.PaqueteDAO;
 import quickdelivery.dao.UsuarioDAO;
+import quickdelivery.dao.VehiculoDAO;
+import quickdelivery.modelos.Asignacion;
 import quickdelivery.modelos.Paquete;
 import quickdelivery.modelos.Usuario;
+import quickdelivery.modelos.Vehiculo;
 
 public class ProcesadorCliente implements Runnable {
 
@@ -18,11 +22,15 @@ public class ProcesadorCliente implements Runnable {
     private DataOutputStream salida;
     private PaqueteDAO paqueteDAO;
     private UsuarioDAO usuarioDAO;
+    private VehiculoDAO vehiculoDAO;
+    private AsignacionDAO asignacionDAO;
 
     public ProcesadorCliente(Socket cliente) {
         this.cliente = cliente;
         this.paqueteDAO = new PaqueteDAO();
         this.usuarioDAO = new UsuarioDAO();
+        this.vehiculoDAO = new VehiculoDAO();
+        this.asignacionDAO = new AsignacionDAO();
     }
 
     public void procesar() {
@@ -68,6 +76,46 @@ public class ProcesadorCliente implements Runnable {
                             eliminarUsuario();
                             break;
 
+                        case Protocolo.LISTAR_VEHICULOS:
+                            listarVehiculos();
+                            break;
+
+                        case Protocolo.CONSULTAR_VEHICULO:
+                            consultarVehiculo();
+                            break;
+
+                        case Protocolo.INSERTAR_VEHICULO:
+                            insertarVehiculo();
+                            break;
+
+                        case Protocolo.MODIFICAR_VEHICULO:
+                            modificarVehiculo();
+                            break;
+
+                        case Protocolo.ELIMINAR_VEHICULO:
+                            eliminarVehiculo();
+                            break;
+
+                        case Protocolo.ASIGNAR_CONDUCTOR:
+                            asignarConductor();
+                            break;
+
+                        case Protocolo.ACTUALIZAR_UBICACION:
+                            actualizarUbicacion();
+                            break;
+
+                        case Protocolo.LISTAR_ASIGNACIONES:
+                            listarAsignaciones();
+                            break;
+
+                        case Protocolo.INSERTAR_ASIGNACION:
+                            insertarAsignacion();
+                            break;
+
+                        case Protocolo.ELIMINAR_ASIGNACION:
+                            eliminarAsignacion();
+                            break;
+
                         case Protocolo.LISTAR_PAQUETES:
                             listarPaquetes();
                             break;
@@ -111,7 +159,7 @@ public class ProcesadorCliente implements Runnable {
                     try {
                         salida.writeUTF(Protocolo.ERROR);
                         salida.writeUTF(
-                                "Ocurrio un error al procesar la solicitud."
+                                "Error en el servidor: " + ex.getMessage()
                         );
                         salida.flush();
                     } catch (IOException ignored) {
@@ -323,6 +371,167 @@ public class ProcesadorCliente implements Runnable {
         salida.writeUTF(nuloAVacio(usuario.getNombreCompleto()));
         salida.writeUTF(nuloAVacio(usuario.getEmail()));
         salida.writeInt(usuario.getIdRol());
+    }
+
+    private void listarVehiculos() throws IOException {
+        List<Vehiculo> lista = vehiculoDAO.listarVehiculos();
+        salida.writeUTF(Protocolo.OK);
+        salida.writeInt(lista.size());
+        for (Vehiculo v : lista) {
+            escribirVehiculo(v);
+        }
+        salida.flush();
+    }
+
+    private void consultarVehiculo() throws IOException {
+        long id = entrada.readLong();
+        Vehiculo v = vehiculoDAO.consultarPorId(id);
+        if (v != null) {
+            salida.writeUTF(Protocolo.OK);
+            escribirVehiculo(v);
+        } else {
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("Vehículo no encontrado.");
+        }
+        salida.flush();
+    }
+
+    private void insertarVehiculo() throws IOException {
+        Vehiculo v = new Vehiculo();
+        v.setPlaca(entrada.readUTF());
+        v.setMarca(entrada.readUTF());
+        v.setModelo(entrada.readUTF());
+        v.setIdTipoVehiculo(entrada.readInt());
+        v.setDisponible(entrada.readUTF());
+
+        if (v.getPlaca() == null || v.getPlaca().trim().isEmpty()) {
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("La placa es obligatoria.");
+        } else {
+            vehiculoDAO.insertar(v);
+            salida.writeUTF(Protocolo.OK);
+            salida.writeUTF("Vehículo insertado.");
+        }
+        salida.flush();
+    }
+
+    private void modificarVehiculo() throws IOException {
+        Vehiculo v = new Vehiculo();
+        v.setIdVehiculo(entrada.readLong());
+        v.setPlaca(entrada.readUTF());
+        v.setMarca(entrada.readUTF());
+        v.setModelo(entrada.readUTF());
+        v.setIdTipoVehiculo(entrada.readInt());
+        v.setDisponible(entrada.readUTF());
+
+        if (vehiculoDAO.consultarPorId(v.getIdVehiculo()) == null) {
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("Vehículo no encontrado.");
+        } else {
+            vehiculoDAO.modificar(v);
+            salida.writeUTF(Protocolo.OK);
+            salida.writeUTF("Vehículo modificado.");
+        }
+        salida.flush();
+    }
+
+    private void eliminarVehiculo() throws IOException {
+        long id = entrada.readLong();
+        if (vehiculoDAO.consultarPorId(id) == null) {
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("Vehículo no encontrado.");
+        } else {
+            vehiculoDAO.eliminar(id);
+            salida.writeUTF(Protocolo.OK);
+            salida.writeUTF("Vehículo eliminado.");
+        }
+        salida.flush();
+    }
+
+    private void asignarConductor() throws IOException {
+        long idUsuario = entrada.readLong();
+        String licencia = entrada.readUTF();
+        long idVehiculo = entrada.readLong();
+
+        if (vehiculoDAO.consultarPorId(idVehiculo) == null) {
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("Vehículo no encontrado.");
+        } else {
+            vehiculoDAO.asignarConductor(idUsuario, licencia, idVehiculo);
+            salida.writeUTF(Protocolo.OK);
+            salida.writeUTF("Conductor asignado.");
+        }
+        salida.flush();
+    }
+
+    private void actualizarUbicacion() throws IOException {
+        long idVehiculo = entrada.readLong();
+        String latitud = entrada.readUTF();
+        String longitud = entrada.readUTF();
+        String fechaHora = entrada.readUTF();
+
+        if (vehiculoDAO.consultarPorId(idVehiculo) == null) {
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("Vehículo no encontrado.");
+        } else {
+            vehiculoDAO.guardarUbicacion(idVehiculo, latitud, longitud, fechaHora);
+            vehiculoDAO.actualizarDisponible(idVehiculo, "NO");
+            salida.writeUTF(Protocolo.OK);
+            salida.writeUTF("Ubicación actualizada.");
+        }
+        salida.flush();
+    }
+
+    private void listarAsignaciones() throws IOException {
+        List<Asignacion> lista = asignacionDAO.listarAsignaciones();
+        salida.writeUTF(Protocolo.OK);
+        salida.writeInt(lista.size());
+        for (Asignacion a : lista) {
+            salida.writeLong(a.getIdAsignacion());
+            salida.writeLong(a.getIdPaquete());
+            salida.writeLong(a.getIdVehiculo());
+            salida.writeUTF(nuloAVacio(a.getFechaAsignacion()));
+        }
+        salida.flush();
+    }
+
+    private void insertarAsignacion() throws IOException {
+        Asignacion a = new Asignacion();
+        a.setIdPaquete(entrada.readLong());
+        a.setIdVehiculo(entrada.readLong());
+        a.setFechaAsignacion(entrada.readUTF());
+
+        if (paqueteDAO.consultarPaquetePorId(a.getIdPaquete()) == null) {
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("Paquete no encontrado.");
+        } else if (vehiculoDAO.consultarPorId(a.getIdVehiculo()) == null) {
+            salida.writeUTF(Protocolo.ERROR);
+            salida.writeUTF("Vehículo no encontrado.");
+        } else {
+            asignacionDAO.insertar(a);
+            paqueteDAO.actualizarEstadoPaquete(a.getIdPaquete(), 2);
+            vehiculoDAO.actualizarDisponible(a.getIdVehiculo(), "NO");
+            salida.writeUTF(Protocolo.OK);
+            salida.writeUTF("Asignación creada.");
+        }
+        salida.flush();
+    }
+
+    private void eliminarAsignacion() throws IOException {
+        long id = entrada.readLong();
+        asignacionDAO.eliminar(id);
+        salida.writeUTF(Protocolo.OK);
+        salida.writeUTF("Asignación eliminada.");
+        salida.flush();
+    }
+
+    private void escribirVehiculo(Vehiculo v) throws IOException {
+        salida.writeLong(v.getIdVehiculo());
+        salida.writeUTF(nuloAVacio(v.getPlaca()));
+        salida.writeUTF(nuloAVacio(v.getMarca()));
+        salida.writeUTF(nuloAVacio(v.getModelo()));
+        salida.writeInt(v.getIdTipoVehiculo());
+        salida.writeUTF(nuloAVacio(v.getDisponible()));
     }
 
     private void listarPaquetes() throws IOException {
