@@ -192,3 +192,14 @@ UPDATE Paquetes SET idEstado = 2 WHERE idPaquete = 1;
 DELETE FROM Paquetes WHERE idPaquete = 2;
 
 SELECT * FROM Paquetes;
+
+
+
+CREATE USER IF NOT EXISTS 'quickdelivery_user'@'localhost'
+IDENTIFIED BY 'QuickDelivery123';
+
+GRANT SELECT, INSERT, UPDATE, DELETE
+      ON quickdelivery.*
+          TO 'quickdelivery_user'@'localhost';
+
+FLUSH PRIVILEGES;
