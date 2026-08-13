@@ -13,9 +13,6 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-/**
- * Vista (MVC): login de QuickDelivery en código (sin GUI Designer).
- */
 public class VistaLogin extends JFrame {
 
     private JLabel lblEmpresa;

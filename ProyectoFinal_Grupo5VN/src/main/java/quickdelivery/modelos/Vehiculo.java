@@ -1,8 +1,6 @@
 package quickdelivery.modelos;
 
-/**
- * Clase padre de los vehículos (herencia).
- */
+// clase padre
 public class Vehiculo {
 
     private long idVehiculo;
@@ -12,12 +10,10 @@ public class Vehiculo {
     private int idTipoVehiculo;
     private String disponible;
 
-    // Método que cada hijo puede cambiar (polimorfismo)
     public String obtenerNombreTipo() {
         return "Vehiculo";
     }
 
-    // Método que cada hijo puede cambiar (polimorfismo)
     public String obtenerCapacidad() {
         return "N/D";
     }

@@ -144,7 +144,7 @@ public class VehiculoDAO {
         }
     }
 
-    // Últimas ubicaciones (las más recientes primero)
+    // últimas ubicaciones
     public List<Ubicacion> listarUbicaciones() {
         List<Ubicacion> lista = new ArrayList<>();
         conexion.setConexion();

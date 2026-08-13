@@ -1,7 +1,7 @@
 package quickdelivery.modelos;
 
+// fábrica de vehículos
 public class VehiculoFactory {
-
     public static Vehiculo crear(int idTipoVehiculo) {
         Vehiculo vehiculo;
 

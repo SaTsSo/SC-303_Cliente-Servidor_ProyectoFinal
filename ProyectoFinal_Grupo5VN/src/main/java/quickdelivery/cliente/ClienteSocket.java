@@ -14,10 +14,7 @@ import quickdelivery.modelos.Vehiculo;
 import quickdelivery.modelos.VehiculoFactory;
 import quickdelivery.protocolo.Protocolo;
 
-/**
- * Cliente socket usado por la capa Modelo/Controlador de la GUI
- * para enviar y recibir operaciones CRUD según el protocolo.
- */
+// cliente socket
 public class ClienteSocket {
 
     private static final String HOST = "127.0.0.1";

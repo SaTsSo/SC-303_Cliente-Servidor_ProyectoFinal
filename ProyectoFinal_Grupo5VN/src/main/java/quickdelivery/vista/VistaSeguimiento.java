@@ -11,9 +11,6 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
-/**
- * Vista simple de seguimiento en tiempo real.
- */
 public class VistaSeguimiento extends JFrame {
 
     private DefaultTableModel modeloPaquetes;

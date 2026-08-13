@@ -14,7 +14,7 @@ public class PaqueteDAO {
     ResultSet resultado = null;
 
 
-    //Consultar todos los paquetes (SELECT)
+    // listar paquetes
     public List<Paquete> listarPaquetes() {
 
         List<Paquete> paquetes = new ArrayList<>();
@@ -48,7 +48,7 @@ public class PaqueteDAO {
         return paquetes;
     }
 
-    //Consultar un paquete por ID (SELECT)
+    // buscar paquete por id
     public Paquete consultarPaquetePorId(long id) {
 
         Paquete paquete = null;
@@ -82,7 +82,7 @@ public class PaqueteDAO {
         return paquete;
     }
 
-    //Agregar paquete nuevo (INSERT)
+    // insertar paquete
     public void insertarPaquete(Paquete paquete) {
 
         conexion.setConexion();
@@ -110,7 +110,7 @@ public class PaqueteDAO {
         }
     }
 
-    //Modificar datos de paquete (UPDATE)
+    // modificar paquete
     public void modificarPaquete(Paquete paquete) {
 
         conexion.setConexion();
@@ -137,7 +137,7 @@ public class PaqueteDAO {
         }
     }
 
-    //Actualizar el estado de paquete (En transito, Entregado, Incidencia)
+    // cambiar estado
     public void actualizarEstadoPaquete(long idPaquete, int idEstado) {
 
         conexion.setConexion();
@@ -161,7 +161,7 @@ public class PaqueteDAO {
     }
 
 
-    //Eliminar paquete (DELETE)
+    // eliminar paquete
     public void eliminarPaquete(long id) {
 
         conexion.setConexion();

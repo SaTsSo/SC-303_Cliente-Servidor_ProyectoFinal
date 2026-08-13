@@ -22,9 +22,6 @@ import quickdelivery.controlador.ControladorVehiculos;
 import quickdelivery.modelos.Sesion;
 import quickdelivery.util.Permisos;
 
-/**
- * Vista (MVC): menú principal en código (sin GUI Designer).
- */
 public class VistaInicio extends JFrame {
 
     private JLabel lblEmpresa;

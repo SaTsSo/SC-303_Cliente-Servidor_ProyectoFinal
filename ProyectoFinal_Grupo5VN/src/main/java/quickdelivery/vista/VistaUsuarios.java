@@ -15,9 +15,6 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
-/**
- * Vista (MVC): CRUD de usuarios.
- */
 public class VistaUsuarios extends JFrame {
 
     public static final String[] ROLES = {

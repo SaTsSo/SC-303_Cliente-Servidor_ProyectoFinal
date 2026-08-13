@@ -8,13 +8,13 @@ import java.net.Socket;
 
         public static void main(String[] args) {
 
-            ServerSocket servidor = null; // Socket del servidor.
-            Socket cliente = null; // Socket del cliente.
+            ServerSocket servidor = null;
+            Socket cliente = null;
 
             try {
                 System.out.println("Servidor QuickDelivery iniciado.");
 
-                servidor = new ServerSocket(5200); // 127.0.0.1
+                servidor = new ServerSocket(5200); // puerto 5200
 
                 while (true) {
 

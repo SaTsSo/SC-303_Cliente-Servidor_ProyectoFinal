@@ -9,9 +9,7 @@ import quickdelivery.modelos.Vehiculo;
 import quickdelivery.vista.VistaPaquetes;
 import quickdelivery.vista.VistaSeguimiento;
 
-/**
- * Actualiza la vista de seguimiento cada 3 segundos.
- */
+// actualiza cada 3 segundos
 public class ControladorSeguimiento {
 
     private final VistaSeguimiento vista;
@@ -24,7 +22,6 @@ public class ControladorSeguimiento {
 
         actualizar();
 
-        // Cada 3 segundos vuelve a pedir datos al servidor
         timer = new Timer(3000, e -> actualizar());
         timer.start();
 

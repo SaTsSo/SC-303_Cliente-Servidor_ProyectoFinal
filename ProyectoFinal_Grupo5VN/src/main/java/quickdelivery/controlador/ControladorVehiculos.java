@@ -18,7 +18,6 @@ public class ControladorVehiculos {
         this.vista = vista;
         this.cliente = cliente;
         registrarEventos();
-        // Al abrir, lista sin diálogo molesto si falla (ej. servidor viejo)
         try {
             listarSinDialogo();
         } catch (Exception ex) {
@@ -33,7 +32,6 @@ public class ControladorVehiculos {
         List<Vehiculo> lista = cliente.listarVehiculos();
         vista.limpiarTabla();
         for (Vehiculo v : lista) {
-            // Polimorfismo: cada hijo responde distinto
             vista.agregarFila(new Object[]{
                 v.getIdVehiculo(),
                 v.getPlaca(),

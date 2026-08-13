@@ -14,9 +14,6 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
-/**
- * Vista (MVC): interfaz gráfica Swing para el CRUD de paquetes.
- */
 public class VistaPaquetes extends JFrame {
 
     public static final String[] ESTADOS = {
