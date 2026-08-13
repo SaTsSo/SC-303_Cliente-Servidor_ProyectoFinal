@@ -1,0 +1,25 @@
+[12/08/2026 22:31:24] Servidor QuickDelivery iniciado.
+[12/08/2026 22:31:55] Cliente conectado: /127.0.0.1
+[12/08/2026 22:31:56] Login exitoso: admin1
+[12/08/2026 22:31:56] Conexión con el cliente finalizada.
+[12/08/2026 22:32:40] Cliente conectado: /127.0.0.1
+[12/08/2026 22:32:41] Login exitoso: admin1
+[12/08/2026 22:32:41] Conexión con el cliente finalizada.
+[12/08/2026 22:32:42] Cliente conectado: /127.0.0.1
+[12/08/2026 22:33:01] Vehículo insertado: 123123
+[12/08/2026 22:33:17] Cliente conectado: /127.0.0.1
+[12/08/2026 22:33:47] Paquete registrado: 1231 (123123 -> 123123)
+[12/08/2026 22:34:02] Paquete modificado: idPaquete=6
+[12/08/2026 22:34:08] Paquete modificado: idPaquete=6
+[12/08/2026 22:34:30] Paquete modificado: idPaquete=6
+[12/08/2026 22:34:34] Paquete modificado: idPaquete=6
+[12/08/2026 22:34:42] Paquete registrado: 11111111 (123123 -> 123123)
+[12/08/2026 22:34:57] Conexión con el cliente finalizada.
+[12/08/2026 22:34:59] Cliente conectado: /127.0.0.1
+[12/08/2026 22:35:22] Paquete asignado: idPaquete=6, idVehiculo=1
+[12/08/2026 22:35:41] Asignación eliminada: idAsignacion=1
+[12/08/2026 22:35:43] Conexión con el cliente finalizada.
+[12/08/2026 22:35:47] Cliente conectado: /127.0.0.1
+[12/08/2026 22:36:04] Conexión con el cliente finalizada.
+[12/08/2026 22:36:19] ERROR - Conexión con el cliente - Connection reset
+[12/08/2026 22:36:19] Conexión con el cliente finalizada.
