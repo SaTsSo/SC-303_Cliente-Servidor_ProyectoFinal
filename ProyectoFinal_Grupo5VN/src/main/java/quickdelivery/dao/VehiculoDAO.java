@@ -7,6 +7,7 @@ import java.util.List;
 import quickdelivery.bd.ConexionBD;
 import quickdelivery.modelos.Ubicacion;
 import quickdelivery.modelos.Vehiculo;
+import quickdelivery.modelos.VehiculoFactory;
 
 public class VehiculoDAO {
 
