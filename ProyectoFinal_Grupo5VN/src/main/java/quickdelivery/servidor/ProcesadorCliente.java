@@ -14,6 +14,7 @@ import quickdelivery.modelos.Asignacion;
 import quickdelivery.modelos.Paquete;
 import quickdelivery.modelos.Usuario;
 import quickdelivery.modelos.Vehiculo;
+import quickdelivery.util.LogEventos;
 
 public class ProcesadorCliente implements Runnable {
 
@@ -151,11 +152,13 @@ public class ProcesadorCliente implements Runnable {
                             salida.writeUTF(Protocolo.ERROR);
                             salida.writeUTF("Solicitud no reconocida.");
                             salida.flush();
+                            LogEventos.registrar("Solicitud no reconocida: " + solicitud);
                             break;
                     }
                 } catch (Exception ex) {
                     System.out.println("Error en solicitud: " + ex.toString());
                     ex.printStackTrace();
+                    LogEventos.registrarError("Solicitud " + solicitud, ex);
                     try {
                         salida.writeUTF(Protocolo.ERROR);
                         salida.writeUTF(
@@ -176,6 +179,7 @@ public class ProcesadorCliente implements Runnable {
             );
 
             ex.printStackTrace();
+            LogEventos.registrarError("Conexión con el cliente", ex);
 
         } finally {
 
@@ -196,6 +200,7 @@ public class ProcesadorCliente implements Runnable {
                 System.out.println(
                         "Conexión con el cliente finalizada."
                 );
+                LogEventos.registrar("Conexión con el cliente finalizada.");
 
             } catch (IOException ex) {
 
@@ -203,6 +208,7 @@ public class ProcesadorCliente implements Runnable {
                         "Error al cerrar la conexión: "
                                 + ex.toString()
                 );
+                LogEventos.registrarError("Cierre de conexión", ex);
             }
         }
     }
@@ -220,9 +226,11 @@ public class ProcesadorCliente implements Runnable {
             salida.writeUTF(nuloAVacio(usuario.getNombreCompleto()));
             salida.writeUTF(nuloAVacio(usuario.getEmail()));
             salida.writeInt(usuario.getIdRol());
+            LogEventos.registrar("Login exitoso: " + usuario.getNombreUsuario());
         } else {
             salida.writeUTF(Protocolo.ERROR);
             salida.writeUTF("Usuario o contraseña incorrectos.");
+            LogEventos.registrar("Login fallido: " + nombreUsuario);
         }
 
         salida.flush();
@@ -280,6 +288,7 @@ public class ProcesadorCliente implements Runnable {
         }
 
         usuarioDAO.insertarUsuario(usuario);
+        LogEventos.registrar("Usuario insertado: " + usuario.getNombreUsuario());
         salida.writeUTF(Protocolo.OK);
         salida.writeUTF("Usuario insertado correctamente.");
         salida.flush();
@@ -308,6 +317,7 @@ public class ProcesadorCliente implements Runnable {
             salida.writeUTF("Usuario no encontrado.");
         } else {
             usuarioDAO.modificarUsuario(usuario);
+            LogEventos.registrar("Usuario modificado: idUsuario=" + usuario.getIdUsuario());
             salida.writeUTF(Protocolo.OK);
             salida.writeUTF("Usuario modificado correctamente.");
         }
@@ -332,6 +342,7 @@ public class ProcesadorCliente implements Runnable {
             salida.writeUTF("Usuario no encontrado.");
         } else {
             usuarioDAO.eliminarUsuario(idUsuario);
+            LogEventos.registrar("Usuario eliminado: idUsuario=" + idUsuario);
             salida.writeUTF(Protocolo.OK);
             salida.writeUTF("Usuario eliminado correctamente.");
         }
@@ -409,6 +420,7 @@ public class ProcesadorCliente implements Runnable {
             salida.writeUTF("La placa es obligatoria.");
         } else {
             vehiculoDAO.insertar(v);
+            LogEventos.registrar("Vehículo insertado: " + v.getPlaca());
             salida.writeUTF(Protocolo.OK);
             salida.writeUTF("Vehículo insertado.");
         }
@@ -429,6 +441,7 @@ public class ProcesadorCliente implements Runnable {
             salida.writeUTF("Vehículo no encontrado.");
         } else {
             vehiculoDAO.modificar(v);
+            LogEventos.registrar("Vehículo modificado: idVehiculo=" + v.getIdVehiculo());
             salida.writeUTF(Protocolo.OK);
             salida.writeUTF("Vehículo modificado.");
         }
@@ -442,6 +455,7 @@ public class ProcesadorCliente implements Runnable {
             salida.writeUTF("Vehículo no encontrado.");
         } else {
             vehiculoDAO.eliminar(id);
+            LogEventos.registrar("Vehículo eliminado: idVehiculo=" + id);
             salida.writeUTF(Protocolo.OK);
             salida.writeUTF("Vehículo eliminado.");
         }
@@ -458,6 +472,8 @@ public class ProcesadorCliente implements Runnable {
             salida.writeUTF("Vehículo no encontrado.");
         } else {
             vehiculoDAO.asignarConductor(idUsuario, licencia, idVehiculo);
+            LogEventos.registrar("Conductor asignado: idUsuario=" + idUsuario
+                    + ", idVehiculo=" + idVehiculo);
             salida.writeUTF(Protocolo.OK);
             salida.writeUTF("Conductor asignado.");
         }
@@ -511,6 +527,8 @@ public class ProcesadorCliente implements Runnable {
             asignacionDAO.insertar(a);
             paqueteDAO.actualizarEstadoPaquete(a.getIdPaquete(), 2);
             vehiculoDAO.actualizarDisponible(a.getIdVehiculo(), "NO");
+            LogEventos.registrar("Paquete asignado: idPaquete=" + a.getIdPaquete()
+                    + ", idVehiculo=" + a.getIdVehiculo());
             salida.writeUTF(Protocolo.OK);
             salida.writeUTF("Asignación creada.");
         }
@@ -520,6 +538,7 @@ public class ProcesadorCliente implements Runnable {
     private void eliminarAsignacion() throws IOException {
         long id = entrada.readLong();
         asignacionDAO.eliminar(id);
+        LogEventos.registrar("Asignación eliminada: idAsignacion=" + id);
         salida.writeUTF(Protocolo.OK);
         salida.writeUTF("Asignación eliminada.");
         salida.flush();
@@ -595,6 +614,9 @@ public class ProcesadorCliente implements Runnable {
         }
 
         paqueteDAO.insertarPaquete(paquete);
+        LogEventos.registrar("Paquete registrado: " + paquete.getDescripcion()
+                + " (" + paquete.getDireccionOrigen() + " -> "
+                + paquete.getDireccionDestino() + ")");
 
         salida.writeUTF(Protocolo.OK);
         salida.writeUTF("Paquete insertado correctamente.");
@@ -626,6 +648,7 @@ public class ProcesadorCliente implements Runnable {
             salida.writeUTF("Paquete no encontrado.");
         } else {
             paqueteDAO.modificarPaquete(paquete);
+            LogEventos.registrar("Paquete modificado: idPaquete=" + paquete.getIdPaquete());
             salida.writeUTF(Protocolo.OK);
             salida.writeUTF("Paquete modificado correctamente.");
         }
@@ -652,6 +675,8 @@ public class ProcesadorCliente implements Runnable {
             salida.writeUTF("Paquete no encontrado.");
         } else {
             paqueteDAO.actualizarEstadoPaquete(idPaquete, idEstado);
+            LogEventos.registrar("Estado actualizado: idPaquete=" + idPaquete
+                    + ", nuevoEstado=" + idEstado);
             salida.writeUTF(Protocolo.OK);
             salida.writeUTF("Estado del paquete actualizado correctamente.");
         }
@@ -677,6 +702,7 @@ public class ProcesadorCliente implements Runnable {
             salida.writeUTF("Paquete no encontrado.");
         } else {
             paqueteDAO.eliminarPaquete(idPaquete);
+            LogEventos.registrar("Paquete eliminado: idPaquete=" + idPaquete);
             salida.writeUTF(Protocolo.OK);
             salida.writeUTF("Paquete eliminado correctamente.");
         }
